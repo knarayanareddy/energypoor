@@ -44,7 +44,7 @@ self-hosted woff2 in `public/fonts/`.
 | `/household/HH-027` | Timeline + actions + barriers + restricted fields + corrections. |
 | `/household/HH-027/brief` | The one-page pre-visit brief. Prints to a single A4 page. |
 | `/household/HH-027/family` | The same file as the household sees it, in plain Dutch, correctable with **“dit klopt niet”**. |
-| `/capture` | Note capture: text box + a real `MediaRecorder` path with a **pre-written** transcript and a visible `demo transcript — no ASR called` chip. |
+| `/capture` | Note capture: text box + a real `MediaRecorder` path. The recording is real; the transcript is a **pre-written fixture**, stated on the screen before you press record and marked `demo transcript — no ASR called` once it is inserted. |
 | `/verify` | Hash-chain verifier + the tamper demo (tamper row 7 → `brokenAt: 7`, reset → `null`). |
 | `/swarm` | The Swarm Lab: 240 synthetic agents, playback, scrub, fire-your-own-story, a draggable decision line, two levers, the Report tab. |
 | `/survey` | The v1/v2 coverage matrix, per-archetype abstention, and the CSV export. |
