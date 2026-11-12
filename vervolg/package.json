@@ -1,0 +1,34 @@
+{
+  "name": "vervolg",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vervolg \u2014 energy-coach case-file memory, with a MiroFish agent simulation",
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 --port 3000",
+    "prebuild": "tsx scripts/gen-swarm.ts && tsx scripts/gen-households.ts && tsx scripts/gen-cases.ts",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "gen:swarm": "tsx scripts/gen-swarm.ts",
+    "verify:chain": "tsx scripts/verify-chain.ts",
+    "dump:fixtures": "tsx scripts/dump-fixtures.ts",
+    "seed": "tsx scripts/seed-audit.ts",
+    "test:browser": "vitest run --config vitest.browser.config.ts"
+  },
+  "dependencies": {
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tsx": "4.23.15",
+    "typescript": "^5.7.0",
+    "vitest": "5.1.0",
+    "@sparticuz/chromium": "^131.0.1",
+    "puppeteer-core": "^23.11.1"
+  }
+}

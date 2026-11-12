@@ -1,0 +1,19 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+
+# The audit log is generated state, not source. `scripts/seed-audit.ts --force`
+# recreates it deterministically in one command, so it is not committed.
+logs/*.jsonl
+logs/*.jsonl.bak
+
+# scratch probes used during the build
+scratch/
+
+# test snapshots of the audit log (created and removed by the suite)
+logs/.*-snapshot.jsonl
+
+# scratch harnesses and generated PDFs/pngs from the browser measurements
+scratch/
+tools/nss-stub/lib/*.so

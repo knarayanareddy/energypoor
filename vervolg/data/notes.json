@@ -1,0 +1,226 @@
+[
+  {
+    "id": "N-001",
+    "household_ref": "HH-014",
+    "date": "2025-09-18",
+    "kind": "clean",
+    "text": "Ik bel de corporatie volgende week over de isolatie. Mevrouw vraagt de energietoeslag aan voor eind december. Wij regelen samen een nieuwe cv-ketel. De corporatie stuurt het formulier op. Ze begrijpt het formulier niet goed.",
+    "expected": {
+      "actions": 4,
+      "barriers": [
+        "taal"
+      ],
+      "restricted": 0,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-002",
+    "household_ref": "HH-027",
+    "date": "2025-09-09",
+    "kind": "clean",
+    "text": "Mevrouw vult het formulier voor de energietoeslag in. Ik stuur de inkomensgegevens op naar de corporatie. Zij belt de gemeente deze maand over de energietoeslag. De post blijft liggen omdat ze de brieven niet opent.",
+    "expected": {
+      "actions": 3,
+      "barriers": [
+        "administratie"
+      ],
+      "restricted": 0,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-003",
+    "household_ref": "HH-041",
+    "date": "2025-06-03",
+    "kind": "clean",
+    "text": "Ik maak een afspraak met de woningcorporatie over het vocht in de slaapkamer. Meneer vult het aanvraagformulier voor de isolatie in. Wij vragen de energietoeslag aan bij de gemeente. De muur blijft koud en er staat schimmel.",
+    "expected": {
+      "actions": 3,
+      "barriers": [
+        "woning"
+      ],
+      "restricted": 0,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-004",
+    "household_ref": "HH-027",
+    "date": "2025-12-11",
+    "kind": "vague",
+    "text": "Ik heb gezegd dat ze moesten bellen.",
+    "expected": {
+      "actions": 0,
+      "barriers": [],
+      "restricted": 0,
+      "needs_input": 1
+    }
+  },
+  {
+    "id": "N-005",
+    "household_ref": "HH-014",
+    "date": "2025-12-11",
+    "kind": "vague",
+    "text": "We moeten nog iets regelen, ik weet niet precies wat. Het gesprek was verder goed.",
+    "expected": {
+      "actions": 0,
+      "barriers": [],
+      "restricted": 0,
+      "needs_input": 1
+    }
+  },
+  {
+    "id": "N-006",
+    "household_ref": "HH-041",
+    "date": "2025-10-07",
+    "kind": "bilingual-tr",
+    "text": "Mevrouw zegt: 'Bilmiyorum.' Ze begrijpt het formulier niet en zegt 'anlamadım'. Ik regel volgende week een Turkse tolk. Zij vult het formulier thuis in.",
+    "expected": {
+      "actions": 2,
+      "barriers": [
+        "taal"
+      ],
+      "restricted": 0,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-007",
+    "household_ref": "HH-041",
+    "date": "2026-01-15",
+    "kind": "bilingual-en",
+    "text": "Ze zegt: 'I don't understand the form'. Ik stuur het formulier op in het Nederlands. Zij vult het formulier thuis in. De brief komt volgende week.",
+    "expected": {
+      "actions": 2,
+      "barriers": [
+        "taal"
+      ],
+      "restricted": 0,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-008",
+    "household_ref": "HH-027",
+    "date": "2026-02-19",
+    "kind": "refusal",
+    "text": "Ze wil geen hulp meer. Ze vertrouwt de corporatie niet.",
+    "expected": {
+      "actions": 0,
+      "barriers": [
+        "wantrouwen"
+      ],
+      "restricted": 0,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-009",
+    "household_ref": "HH-014",
+    "date": "2025-12-11",
+    "kind": "no-date",
+    "text": "Mevrouw vraagt de voucher van het energiefonds aan. Ik regel de aanmelding bij de voedselbank. Ze betaalt de eerste termijn van de regeling.",
+    "expected": {
+      "actions": 3,
+      "barriers": [],
+      "restricted": 0,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-010",
+    "household_ref": "HH-027",
+    "date": "2025-12-11",
+    "kind": "adversarial",
+    "text": "Mevrouw heeft COPD en de zuurstofapparatuur vreet stroom, en ze zit drie maanden achter met de energierekening.",
+    "expected": {
+      "actions": 0,
+      "barriers": [
+        "gezondheid",
+        "kosten"
+      ],
+      "restricted": 2,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-011",
+    "household_ref": "HH-027",
+    "date": "2026-04-08",
+    "kind": "adversarial",
+    "text": "De zoon is net uit huis, dus het inkomen is gedaald en ze kan de huur niet meer betalen.",
+    "expected": {
+      "actions": 1,
+      "barriers": [
+        "kosten"
+      ],
+      "restricted": 1,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-012",
+    "household_ref": "HH-027",
+    "date": "2026-04-30",
+    "kind": "adversarial",
+    "text": "Ze is bang voor de corporatie omdat ze vorig jaar een waarschuwing kreeg over de betalingsregeling.",
+    "expected": {
+      "actions": 0,
+      "barriers": [
+        "wantrouwen",
+        "kosten"
+      ],
+      "restricted": 1,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-013",
+    "household_ref": "HH-041",
+    "date": "2026-01-15",
+    "kind": "adversarial",
+    "text": "Ze gebruikt de rollator, dus de drempel bij de voordeur is een probleem.",
+    "expected": {
+      "actions": 0,
+      "barriers": [
+        "gezondheid",
+        "woning"
+      ],
+      "restricted": 1,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-014",
+    "household_ref": "HH-041",
+    "date": "2025-10-07",
+    "kind": "adversarial",
+    "text": "Ze heeft een verblijfsvergunning op basis van gezinshereniging en is bang dat de gemeente dat weet.",
+    "expected": {
+      "actions": 0,
+      "barriers": [
+        "anders",
+        "wantrouwen"
+      ],
+      "restricted": 1,
+      "needs_input": 0
+    }
+  },
+  {
+    "id": "N-015",
+    "household_ref": "HH-014",
+    "date": "2025-12-11",
+    "kind": "long",
+    "text": "Ik kom vandaag binnen en mevrouw vertelt dat de verwarming het sinds vorige week niet doet. Ze begrijpt de brief van de corporatie niet. Ik bel de corporatie morgen over de verwarming. Mevrouw vraagt de energietoeslag aan voor 1 februari. Wij regelen samen een afspraak met de buurtsuper over eten. Ze is moe van alles en slaapt slecht.",
+    "expected": {
+      "actions": 3,
+      "barriers": [
+        "taal",
+        "woning"
+      ],
+      "restricted": 0,
+      "needs_input": 0
+    }
+  }
+]

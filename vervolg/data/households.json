@@ -1,0 +1,686 @@
+[
+  {
+    "household_ref": "HH-014",
+    "display_nl": "Familie Yılmaz — Korrewegwijk",
+    "composition_nl": "2 volwassenen, 2 kinderen",
+    "tenure": "huur-corporatie",
+    "label": "F",
+    "programme": "Gemeente Groningen — energiearmoede 2026",
+    "consent": {
+      "household_visible": true,
+      "share_with_corporation": false
+    },
+    "last_visit": "2026-02-11",
+    "visits": [
+      {
+        "visit_id": "V-hh-014-2025-03-14",
+        "household_ref": "HH-014",
+        "date": "2025-03-14",
+        "coach_ref": "C-07",
+        "transcript": "Ik bel de corporatie deze maand over de isolatie van de voorgevel. Mevrouw vraagt de energietoeslag aan voor eind mei. Wij regelen samen een nieuwe cv-ketel. Ze begrijpt het formulier niet goed.",
+        "actions_added": [
+          "A-HH-014-1",
+          "A-HH-014-2",
+          "A-HH-014-3"
+        ],
+        "barriers_added": [
+          "B-HH-014-1"
+        ],
+        "restricted_count": 0,
+        "corrections": [],
+        "restricted_fields": {}
+      },
+      {
+        "visit_id": "V-hh-014-2025-06-02",
+        "household_ref": "HH-014",
+        "date": "2025-06-02",
+        "coach_ref": "C-07",
+        "transcript": "Ik bel de corporatie over de startdatum van de isolatie. Mevrouw vult het formulier voor het energiefonds in. Wij regelen samen een nieuwe cv-ketel. Ze begrijpt het formulier van het energiefonds niet.",
+        "actions_added": [
+          "A-HH-014-4",
+          "A-HH-014-5",
+          "A-HH-014-3"
+        ],
+        "barriers_added": [],
+        "restricted_count": 0,
+        "corrections": [],
+        "restricted_fields": {}
+      },
+      {
+        "visit_id": "V-hh-014-2025-09-18",
+        "household_ref": "HH-014",
+        "date": "2025-09-18",
+        "coach_ref": "C-07",
+        "transcript": "Mevrouw vraagt de voucher van het energiefonds aan. Ze betaalt de eerste termijn van de regeling. Ik regel een afspraak met de woningcorporatie over de vochtplek in de hoek.",
+        "actions_added": [
+          "A-HH-014-6",
+          "A-HH-014-7",
+          "A-HH-014-8"
+        ],
+        "barriers_added": [],
+        "restricted_count": 0,
+        "corrections": [],
+        "restricted_fields": {}
+      },
+      {
+        "visit_id": "V-hh-014-2026-02-11",
+        "household_ref": "HH-014",
+        "date": "2026-02-11",
+        "coach_ref": "C-07",
+        "transcript": "Ik maak een afspraak met de corporatie over het vervangen van de voordeur. Mevrouw vult het formulier voor de huurtoeslag in. Ze heeft COPD en de zuurstofapparatuur vreet stroom.",
+        "actions_added": [
+          "A-HH-014-9",
+          "A-HH-014-10"
+        ],
+        "barriers_added": [
+          "B-HH-014-2"
+        ],
+        "restricted_count": 1,
+        "corrections": [],
+        "restricted_fields": {
+          "health_mention_1": "Ze heeft COPD en de zuurstofapparatuur vreet stroom."
+        }
+      }
+    ],
+    "actions": [
+      {
+        "action_id": "A-HH-014-1",
+        "household_ref": "HH-014",
+        "who": "coach",
+        "what_nl": "Isolatie van de voorgevel bellen",
+        "by_when": "2025-03-31",
+        "status": "gedaan",
+        "evidence": "Corporatie bevestigde de aanvraag per brief op 21 mei.",
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2025-03-14",
+        "status_at_visit": "V-hh-014-2025-06-02"
+      },
+      {
+        "action_id": "A-HH-014-2",
+        "household_ref": "HH-014",
+        "who": "huishouden",
+        "what_nl": "De energietoeslag aanvragen",
+        "by_when": "2025-05-31",
+        "status": "gedaan",
+        "evidence": "Toekenning van de gemeente per brief, 12 juni.",
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2025-03-14",
+        "status_at_visit": "V-hh-014-2025-09-18"
+      },
+      {
+        "action_id": "A-HH-014-3",
+        "household_ref": "HH-014",
+        "who": "coach",
+        "what_nl": "De nieuwe cv-ketel regelen",
+        "by_when": null,
+        "status": "gedaan",
+        "evidence": "Nieuwe ketel geplaatst op 14 augustus, monteur heeft het gemeld.",
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2025-03-14",
+        "status_at_visit": "V-hh-014-2025-09-18"
+      },
+      {
+        "action_id": "A-HH-014-4",
+        "household_ref": "HH-014",
+        "who": "coach",
+        "what_nl": "De startdatum van de isolatie bellen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2025-06-02",
+        "status_at_visit": "V-hh-014-2025-06-02"
+      },
+      {
+        "action_id": "A-HH-014-5",
+        "household_ref": "HH-014",
+        "who": "huishouden",
+        "what_nl": "Het formulier voor het energiefonds invullen",
+        "by_when": null,
+        "status": "niet_gedaan",
+        "evidence": "Kon het formulier niet invullen, wist niet waar ze het naartoe moest sturen.",
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2025-06-02",
+        "status_at_visit": "V-hh-014-2025-09-18"
+      },
+      {
+        "action_id": "A-HH-014-6",
+        "household_ref": "HH-014",
+        "who": "huishouden",
+        "what_nl": "De voucher van het energiefonds aanvragen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2025-09-18",
+        "status_at_visit": "V-hh-014-2025-09-18"
+      },
+      {
+        "action_id": "A-HH-014-7",
+        "household_ref": "HH-014",
+        "who": "huishouden",
+        "what_nl": "De eerste termijn van de regeling betalen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2025-09-18",
+        "status_at_visit": "V-hh-014-2025-09-18"
+      },
+      {
+        "action_id": "A-HH-014-8",
+        "household_ref": "HH-014",
+        "who": "coach",
+        "what_nl": "De afspraak over de vochtplek in de hoek regelen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2025-09-18",
+        "status_at_visit": "V-hh-014-2025-09-18"
+      },
+      {
+        "action_id": "A-HH-014-9",
+        "household_ref": "HH-014",
+        "who": "coach",
+        "what_nl": "De afspraak over het vervangen van de voordeur maken",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2026-02-11",
+        "status_at_visit": "V-hh-014-2026-02-11"
+      },
+      {
+        "action_id": "A-HH-014-10",
+        "household_ref": "HH-014",
+        "who": "huishouden",
+        "what_nl": "Het formulier voor de huurtoeslag invullen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-014-2026-02-11",
+        "status_at_visit": "V-hh-014-2026-02-11"
+      }
+    ],
+    "barriers": [
+      {
+        "barrier_id": "B-HH-014-1",
+        "household_ref": "HH-014",
+        "kind": "taal",
+        "note_nl": "Ze begrijpt het formulier niet goed.",
+        "restricted": false,
+        "visit_id": "V-hh-014-2025-03-14"
+      },
+      {
+        "barrier_id": "B-HH-014-2",
+        "household_ref": "HH-014",
+        "kind": "gezondheid",
+        "note_nl": "Beperkte notitie over gezondheid — zie beperkte velden.",
+        "restricted": true,
+        "visit_id": "V-hh-014-2026-02-11"
+      }
+    ]
+  },
+  {
+    "household_ref": "HH-027",
+    "display_nl": "Mevrouw de Boer — Paddepoel",
+    "composition_nl": "1 volwassene, 74 jaar",
+    "tenure": "huur-corporatie",
+    "label": "G",
+    "programme": "Gemeente Groningen — energiearmoede 2026",
+    "consent": {
+      "household_visible": true,
+      "share_with_corporation": false
+    },
+    "last_visit": "2026-02-19",
+    "visits": [
+      {
+        "visit_id": "V-hh-027-2025-03-11",
+        "household_ref": "HH-027",
+        "date": "2025-03-11",
+        "coach_ref": "C-07",
+        "transcript": "Ik regel een betalingsregeling met de corporatie voor de eerste helft van het jaar. Mevrouw vult het formulier voor de energietoeslag in. Wij vragen kwijtschelding van de gemeente aan. Ze is bang voor de corporatie.",
+        "actions_added": [
+          "A-HH-027-1",
+          "A-HH-027-2",
+          "A-HH-027-3"
+        ],
+        "barriers_added": [
+          "B-HH-027-1",
+          "B-HH-027-2"
+        ],
+        "restricted_count": 1,
+        "corrections": [],
+        "restricted_fields": {
+          "debt_mention_1": "Ik regel een betalingsregeling met de corporatie voor de eerste helft van het jaar."
+        }
+      },
+      {
+        "visit_id": "V-hh-027-2025-06-17",
+        "household_ref": "HH-027",
+        "date": "2025-06-17",
+        "coach_ref": "C-07",
+        "transcript": "Ik bel de corporatie over de betalingsregeling. Mevrouw vult het formulier voor de energietoeslag in. Ze vertrouwt de corporatie niet en begrijpt het formulier niet.",
+        "actions_added": [
+          "A-HH-027-1",
+          "A-HH-027-2"
+        ],
+        "barriers_added": [
+          "B-HH-027-3"
+        ],
+        "restricted_count": 1,
+        "corrections": [],
+        "restricted_fields": {
+          "debt_mention_1": "Ik bel de corporatie over de betalingsregeling."
+        }
+      },
+      {
+        "visit_id": "V-hh-027-2025-10-09",
+        "household_ref": "HH-027",
+        "date": "2025-10-09",
+        "coach_ref": "C-07",
+        "transcript": "Mevrouw vraagt de voucher van het energiefonds aan. Ik vraag een nieuwe brief aan bij de corporatie. Ze heeft COPD en de zuurstofapparatuur vreet stroom.",
+        "actions_added": [
+          "A-HH-027-4",
+          "A-HH-027-5"
+        ],
+        "barriers_added": [
+          "B-HH-027-4"
+        ],
+        "restricted_count": 1,
+        "corrections": [],
+        "restricted_fields": {
+          "health_mention_1": "Ze heeft COPD en de zuurstofapparatuur vreet stroom."
+        }
+      },
+      {
+        "visit_id": "V-hh-027-2026-02-19",
+        "household_ref": "HH-027",
+        "date": "2026-02-19",
+        "coach_ref": "C-07",
+        "transcript": "Ik maak een afspraak met de woningcorporatie over het onderhoud van de verwarming. Mevrouw belt de gemeente over de energietoeslag. Ze wil geen hulp meer en vertrouwt de corporatie niet.",
+        "actions_added": [
+          "A-HH-027-6",
+          "A-HH-027-7"
+        ],
+        "barriers_added": [],
+        "restricted_count": 0,
+        "corrections": [],
+        "restricted_fields": {}
+      }
+    ],
+    "actions": [
+      {
+        "action_id": "A-HH-027-1",
+        "household_ref": "HH-027",
+        "who": "coach",
+        "what_nl": "Afspraak over betalingen — zie beperkte velden.",
+        "by_when": null,
+        "status": "niet_gedaan",
+        "evidence": "Tweede afspraak niet gekomen: de corporatie wilde een intake, mevrouw durfde de deur niet open te doen.",
+        "restricted": true,
+        "set_at_visit": "V-hh-027-2025-03-11",
+        "status_at_visit": "V-hh-027-2025-10-09"
+      },
+      {
+        "action_id": "A-HH-027-2",
+        "household_ref": "HH-027",
+        "who": "huishouden",
+        "what_nl": "Het formulier voor de energietoeslag invullen",
+        "by_when": null,
+        "status": "gedaan",
+        "evidence": "Formulier ingeleverd bij de balie, stempel op de kopie.",
+        "restricted": false,
+        "set_at_visit": "V-hh-027-2025-03-11",
+        "status_at_visit": "V-hh-027-2025-06-17"
+      },
+      {
+        "action_id": "A-HH-027-3",
+        "household_ref": "HH-027",
+        "who": "coach",
+        "what_nl": "Kwijtschelding aanvragen",
+        "by_when": null,
+        "status": "niet_gedaan",
+        "evidence": "Kwijtschelding is afgewezen: het formulier vroeg om een DigiD die zij niet heeft.",
+        "restricted": false,
+        "set_at_visit": "V-hh-027-2025-03-11",
+        "status_at_visit": "V-hh-027-2025-06-17"
+      },
+      {
+        "action_id": "A-HH-027-4",
+        "household_ref": "HH-027",
+        "who": "huishouden",
+        "what_nl": "De voucher van het energiefonds aanvragen",
+        "by_when": null,
+        "status": "gedaan",
+        "evidence": "Voucher aangevraagd bij het energiefonds, bevestiging per post.",
+        "restricted": false,
+        "set_at_visit": "V-hh-027-2025-10-09",
+        "status_at_visit": "V-hh-027-2026-02-19"
+      },
+      {
+        "action_id": "A-HH-027-5",
+        "household_ref": "HH-027",
+        "who": "coach",
+        "what_nl": "De nieuwe brief aanvragen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-027-2025-10-09",
+        "status_at_visit": "V-hh-027-2025-10-09"
+      },
+      {
+        "action_id": "A-HH-027-6",
+        "household_ref": "HH-027",
+        "who": "coach",
+        "what_nl": "De afspraak over het onderhoud van de verwarming maken",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-027-2026-02-19",
+        "status_at_visit": "V-hh-027-2026-02-19"
+      },
+      {
+        "action_id": "A-HH-027-7",
+        "household_ref": "HH-027",
+        "who": "huishouden",
+        "what_nl": "De energietoeslag bellen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-027-2026-02-19",
+        "status_at_visit": "V-hh-027-2026-02-19"
+      }
+    ],
+    "barriers": [
+      {
+        "barrier_id": "B-HH-027-1",
+        "household_ref": "HH-027",
+        "kind": "kosten",
+        "note_nl": "Beperkte notitie over betalingen — zie beperkte velden.",
+        "restricted": true,
+        "visit_id": "V-hh-027-2025-03-11"
+      },
+      {
+        "barrier_id": "B-HH-027-2",
+        "household_ref": "HH-027",
+        "kind": "wantrouwen",
+        "note_nl": "Ze is bang voor de corporatie.",
+        "restricted": false,
+        "visit_id": "V-hh-027-2025-03-11"
+      },
+      {
+        "barrier_id": "B-HH-027-3",
+        "household_ref": "HH-027",
+        "kind": "taal",
+        "note_nl": "Begrijpt het formulier niet.",
+        "restricted": false,
+        "visit_id": "V-hh-027-2025-06-17"
+      },
+      {
+        "barrier_id": "B-HH-027-4",
+        "household_ref": "HH-027",
+        "kind": "gezondheid",
+        "note_nl": "Beperkte notitie over gezondheid — zie beperkte velden.",
+        "restricted": true,
+        "visit_id": "V-hh-027-2025-10-09"
+      }
+    ]
+  },
+  {
+    "household_ref": "HH-041",
+    "display_nl": "Dhr. Osei — Vinkhuizen",
+    "composition_nl": "2 volwassenen, 1 kind",
+    "tenure": "huur-prive",
+    "label": "E",
+    "programme": "Gemeente Groningen — energiearmoede 2026",
+    "consent": {
+      "household_visible": true,
+      "share_with_corporation": false
+    },
+    "last_visit": "2026-01-15",
+    "visits": [
+      {
+        "visit_id": "V-hh-041-2025-04-08",
+        "household_ref": "HH-041",
+        "date": "2025-04-08",
+        "coach_ref": "C-11",
+        "transcript": "Ik maak een afspraak met de woningcorporatie over het vocht in de slaapkamer. Meneer vult het aanvraagformulier voor de isolatie in. Wij vragen de energietoeslag aan bij de gemeente. De muur blijft koud en er staat schimmel.",
+        "actions_added": [
+          "A-HH-041-1",
+          "A-HH-041-2",
+          "A-HH-041-3"
+        ],
+        "barriers_added": [
+          "B-HH-041-1"
+        ],
+        "restricted_count": 0,
+        "corrections": [],
+        "restricted_fields": {}
+      },
+      {
+        "visit_id": "V-hh-041-2025-07-15",
+        "household_ref": "HH-041",
+        "date": "2025-07-15",
+        "coach_ref": "C-11",
+        "transcript": "Ik stuur het aanvraagformulier voor de isolatie op naar de corporatie. Meneer vult het formulier voor de energietoeslag in. Wij vragen huurverlaging aan bij de gemeente. Hij begrijpt het formulier niet en leest de brieven niet.",
+        "actions_added": [
+          "A-HH-041-4",
+          "A-HH-041-5",
+          "A-HH-041-6"
+        ],
+        "barriers_added": [
+          "B-HH-041-2",
+          "B-HH-041-3"
+        ],
+        "restricted_count": 0,
+        "corrections": [],
+        "restricted_fields": {}
+      },
+      {
+        "visit_id": "V-hh-041-2025-10-07",
+        "household_ref": "HH-041",
+        "date": "2025-10-07",
+        "coach_ref": "C-11",
+        "transcript": "Ik vraag een nieuwe brief aan bij de corporatie. Meneer vult het aanvraagformulier voor de isolatie in. Ze gebruikt de rollator, dus de drempel bij de voordeur is een probleem.",
+        "actions_added": [
+          "A-HH-041-7",
+          "A-HH-041-2"
+        ],
+        "barriers_added": [
+          "B-HH-041-4"
+        ],
+        "restricted_count": 1,
+        "corrections": [],
+        "restricted_fields": {
+          "health_mention_1": "Ze gebruikt de rollator, dus de drempel bij de voordeur is een probleem."
+        }
+      },
+      {
+        "visit_id": "V-hh-041-2026-01-15",
+        "household_ref": "HH-041",
+        "date": "2026-01-15",
+        "coach_ref": "C-11",
+        "transcript": "Ik regel een Turkse tolk voor het volgende gesprek. De woningcorporatie stuurt het formulier op. Ze heeft een verblijfsvergunning op basis van gezinshereniging en is bang dat de gemeente dat weet. Hij begrijpt het formulier niet.",
+        "actions_added": [
+          "A-HH-041-8",
+          "A-HH-041-9"
+        ],
+        "barriers_added": [
+          "B-HH-041-5",
+          "B-HH-041-6"
+        ],
+        "restricted_count": 1,
+        "corrections": [],
+        "restricted_fields": {
+          "legal_mention_1": "Ze heeft een verblijfsvergunning op basis van gezinshereniging en is bang dat de gemeente dat weet."
+        }
+      }
+    ],
+    "actions": [
+      {
+        "action_id": "A-HH-041-1",
+        "household_ref": "HH-041",
+        "who": "coach",
+        "what_nl": "De afspraak over het vocht in de slaapkamer maken",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-041-2025-04-08",
+        "status_at_visit": "V-hh-041-2025-04-08"
+      },
+      {
+        "action_id": "A-HH-041-2",
+        "household_ref": "HH-041",
+        "who": "huishouden",
+        "what_nl": "Het aanvraagformulier voor de isolatie invullen",
+        "by_when": null,
+        "status": "niet_gedaan",
+        "evidence": "Het formulier is tweemaal teruggestuurd: verkeerde bijlage, en de brief was alleen in het Nederlands.",
+        "restricted": false,
+        "set_at_visit": "V-hh-041-2025-04-08",
+        "status_at_visit": "V-hh-041-2026-01-15"
+      },
+      {
+        "action_id": "A-HH-041-3",
+        "household_ref": "HH-041",
+        "who": "coach",
+        "what_nl": "De energietoeslag aanvragen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-041-2025-04-08",
+        "status_at_visit": "V-hh-041-2025-04-08"
+      },
+      {
+        "action_id": "A-HH-041-4",
+        "household_ref": "HH-041",
+        "who": "coach",
+        "what_nl": "Het aanvraagformulier voor de isolatie opsturen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-041-2025-07-15",
+        "status_at_visit": "V-hh-041-2025-07-15"
+      },
+      {
+        "action_id": "A-HH-041-5",
+        "household_ref": "HH-041",
+        "who": "huishouden",
+        "what_nl": "Het formulier voor de energietoeslag invullen",
+        "by_when": null,
+        "status": "gedaan",
+        "evidence": "Energietoeslag toegekend, brief van de gemeente gezien op 3 juli.",
+        "restricted": false,
+        "set_at_visit": "V-hh-041-2025-07-15",
+        "status_at_visit": "V-hh-041-2025-07-15"
+      },
+      {
+        "action_id": "A-HH-041-6",
+        "household_ref": "HH-041",
+        "who": "coach",
+        "what_nl": "Huurverlaging aanvragen",
+        "by_when": null,
+        "status": "niet_gedaan",
+        "evidence": "Afgewezen: hij heeft een privé-verhuurder en de regeling geldt alleen bij corporaties.",
+        "restricted": false,
+        "set_at_visit": "V-hh-041-2025-07-15",
+        "status_at_visit": "V-hh-041-2025-10-07"
+      },
+      {
+        "action_id": "A-HH-041-7",
+        "household_ref": "HH-041",
+        "who": "coach",
+        "what_nl": "De nieuwe brief aanvragen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-041-2025-10-07",
+        "status_at_visit": "V-hh-041-2025-10-07"
+      },
+      {
+        "action_id": "A-HH-041-8",
+        "household_ref": "HH-041",
+        "who": "coach",
+        "what_nl": "Turkse tolk voor het volgende gesprek regelen",
+        "by_when": null,
+        "status": "gedaan",
+        "evidence": "Tolk geregeld via het buurtteam, afspraak op 22 januari.",
+        "restricted": false,
+        "set_at_visit": "V-hh-041-2026-01-15",
+        "status_at_visit": "V-hh-041-2026-01-15"
+      },
+      {
+        "action_id": "A-HH-041-9",
+        "household_ref": "HH-041",
+        "who": "corporatie",
+        "what_nl": "Het formulier opsturen",
+        "by_when": null,
+        "status": "afgesproken",
+        "evidence": null,
+        "restricted": false,
+        "set_at_visit": "V-hh-041-2026-01-15",
+        "status_at_visit": "V-hh-041-2026-01-15"
+      }
+    ],
+    "barriers": [
+      {
+        "barrier_id": "B-HH-041-1",
+        "household_ref": "HH-041",
+        "kind": "woning",
+        "note_nl": "Er staat schimmel.",
+        "restricted": false,
+        "visit_id": "V-hh-041-2025-04-08"
+      },
+      {
+        "barrier_id": "B-HH-041-2",
+        "household_ref": "HH-041",
+        "kind": "taal",
+        "note_nl": "Hij begrijpt het formulier niet",
+        "restricted": false,
+        "visit_id": "V-hh-041-2025-07-15"
+      },
+      {
+        "barrier_id": "B-HH-041-3",
+        "household_ref": "HH-041",
+        "kind": "administratie",
+        "note_nl": "Leest de brieven niet.",
+        "restricted": false,
+        "visit_id": "V-hh-041-2025-07-15"
+      },
+      {
+        "barrier_id": "B-HH-041-4",
+        "household_ref": "HH-041",
+        "kind": "gezondheid",
+        "note_nl": "Beperkte notitie over gezondheid — zie beperkte velden.",
+        "restricted": true,
+        "visit_id": "V-hh-041-2025-10-07"
+      },
+      {
+        "barrier_id": "B-HH-041-5",
+        "household_ref": "HH-041",
+        "kind": "anders",
+        "note_nl": "Beperkte notitie over een instantie — zie beperkte velden.",
+        "restricted": true,
+        "visit_id": "V-hh-041-2026-01-15"
+      },
+      {
+        "barrier_id": "B-HH-041-6",
+        "household_ref": "HH-041",
+        "kind": "wantrouwen",
+        "note_nl": "Is bang dat de gemeente dat weet.",
+        "restricted": false,
+        "visit_id": "V-hh-041-2026-01-15"
+      }
+    ]
+  }
+]

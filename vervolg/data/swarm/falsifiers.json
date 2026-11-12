@@ -1,0 +1,56 @@
+[
+  {
+    "id": "F1",
+    "written_at": "2026-11-11T09:00:00Z",
+    "claim": "A majority of households would accept a visible, correctable file.",
+    "test": "QVOICE",
+    "expected": true,
+    "claim_holds_when": "frequency_gt_half",
+    "if_false": "The permission model is the product, and the population rejects it. The household view becomes a legal requirement we must argue for, not a feature we can lead with."
+  },
+  {
+    "id": "F2",
+    "written_at": "2026-11-11T09:00:00Z",
+    "claim": "Follow-through beats kWh as the metric they would accept.",
+    "test": "QMETRIC",
+    "expected": true,
+    "claim_holds_when": "frequency_gt_half",
+    "if_false": "The honesty argument fails with the people it protects: they want the number the funder wants. Rework the impact story."
+  },
+  {
+    "id": "F3",
+    "written_at": "2026-11-11T09:00:00Z",
+    "claim": "Households trust the municipality enough to accept the route.",
+    "test": "QTRUST",
+    "expected": true,
+    "claim_holds_when": "frequency_gt_half",
+    "if_false": "Municipal route collapses; the welfare organisation becomes the only viable first customer."
+  },
+  {
+    "id": "F4",
+    "written_at": "2026-11-11T09:00:00Z",
+    "claim": "A coach would capture by voice.",
+    "test": "QADOPT",
+    "expected": true,
+    "claim_holds_when": "frequency_gt_half",
+    "if_false": "Capture friction kills the product; the input becomes a form after all."
+  },
+  {
+    "id": "F5",
+    "written_at": "2026-11-11T09:00:00Z",
+    "claim": "The permission model survives a leak story.",
+    "test": "QSCANDAL",
+    "expected": false,
+    "claim_holds_when": "frequency_le_half",
+    "if_false_but_expected_false": "Resilient. If TRUE the design is fragile to one incident and we say so."
+  },
+  {
+    "id": "F6",
+    "written_at": "2026-11-11T09:00:00Z",
+    "claim": "The population accepts caseload sorting.",
+    "test": "QSORT",
+    "expected": true,
+    "claim_holds_when": "frequency_gt_half",
+    "if_false": "The queue must stay date-ordered. This is the cheapest finding to act on: change one control."
+  }
+]

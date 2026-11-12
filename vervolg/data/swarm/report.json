@@ -1,0 +1,2111 @@
+{
+ "generated_at": "2026-11-11T23:19:25.681Z",
+ "seed_base": 20261111,
+ "runs": 200,
+ "rounds": 24,
+ "n_agents": 240,
+ "elapsed_ms": 1193,
+ "quotas": {
+  "hh_nl": 58,
+  "hh_mig": 34,
+  "hh_elderly": 26,
+  "coach": 38,
+  "muni": 22,
+  "corp": 20,
+  "landlord": 16,
+  "supplier": 14,
+  "welfare": 12
+ },
+ "archetypes": [
+  {
+   "key": "hh_nl",
+   "label_nl": "Nederlandse huishoudens",
+   "n": 58,
+   "household": true,
+   "who_nl": "Nederlandstalige huishoudens in energiearmoede",
+   "priors": {
+    "voice": 0.62,
+    "metric": 0.58,
+    "payer": 0.6,
+    "adopt": 0.55,
+    "trust": 0.42,
+    "queue": 0.48
+   },
+   "behav": {
+    "voice": 0.55,
+    "susceptibility": 0.62,
+    "conviction": 0.45
+   }
+  },
+  {
+   "key": "hh_mig",
+   "label_nl": "Migratieachtergrond",
+   "n": 34,
+   "household": true,
+   "who_nl": "eerste taal niet Nederlands; vaak het moeilijkst te bereiken",
+   "priors": {
+    "voice": 0.48,
+    "metric": 0.52,
+    "payer": 0.55,
+    "adopt": 0.38,
+    "trust": 0.3,
+    "queue": 0.4
+   },
+   "behav": {
+    "voice": 0.4,
+    "susceptibility": 0.7,
+    "conviction": 0.5
+   }
+  },
+  {
+   "key": "hh_elderly",
+   "label_nl": "Oudere huishoudens",
+   "n": 26,
+   "household": true,
+   "who_nl": "70+, vaak eigenaar of langdurige huurder",
+   "priors": {
+    "voice": 0.55,
+    "metric": 0.6,
+    "payer": 0.58,
+    "adopt": 0.3,
+    "trust": 0.48,
+    "queue": 0.52
+   },
+   "behav": {
+    "voice": 0.5,
+    "susceptibility": 0.45,
+    "conviction": 0.7
+   }
+  },
+  {
+   "key": "coach",
+   "label_nl": "Energiecoaches",
+   "n": 38,
+   "household": false,
+   "who_nl": "de daadwerkelijke gebruikers van het product",
+   "priors": {
+    "voice": 0.78,
+    "metric": 0.7,
+    "payer": 0.52,
+    "adopt": 0.62,
+    "trust": 0.45,
+    "queue": 0.58
+   },
+   "behav": {
+    "voice": 0.8,
+    "susceptibility": 0.55,
+    "conviction": 0.5
+   }
+  },
+  {
+   "key": "muni",
+   "label_nl": "Gemeente",
+   "n": 22,
+   "household": false,
+   "who_nl": "programmamanagers, beleidsmedewerkers",
+   "priors": {
+    "voice": 0.7,
+    "metric": 0.62,
+    "payer": 0.82,
+    "adopt": 0.58,
+    "trust": 0.6,
+    "queue": 0.72
+   },
+   "behav": {
+    "voice": 0.72,
+    "susceptibility": 0.35,
+    "conviction": 0.72
+   }
+  },
+  {
+   "key": "corp",
+   "label_nl": "Corporatie",
+   "n": 20,
+   "household": false,
+   "who_nl": "maatschappelijk team, achterstandenroute",
+   "priors": {
+    "voice": 0.66,
+    "metric": 0.5,
+    "payer": 0.34,
+    "adopt": 0.5,
+    "trust": 0.55,
+    "queue": 0.66
+   },
+   "behav": {
+    "voice": 0.66,
+    "susceptibility": 0.32,
+    "conviction": 0.68
+   }
+  },
+  {
+   "key": "landlord",
+   "label_nl": "Private verhuurders",
+   "n": 16,
+   "household": false,
+   "who_nl": "kleine verhuurders, vaak de belemmering",
+   "priors": {
+    "voice": 0.6,
+    "metric": 0.34,
+    "payer": 0.24,
+    "adopt": 0.34,
+    "trust": 0.38,
+    "queue": 0.44
+   },
+   "behav": {
+    "voice": 0.62,
+    "susceptibility": 0.28,
+    "conviction": 0.8
+   }
+  },
+  {
+   "key": "supplier",
+   "label_nl": "Energieleveranciers",
+   "n": 14,
+   "household": false,
+   "who_nl": "schuldroutes, budgetbeheer",
+   "priors": {
+    "voice": 0.58,
+    "metric": 0.3,
+    "payer": 0.3,
+    "adopt": 0.42,
+    "trust": 0.34,
+    "queue": 0.4
+   },
+   "behav": {
+    "voice": 0.6,
+    "susceptibility": 0.26,
+    "conviction": 0.82
+   }
+  },
+  {
+   "key": "welfare",
+   "label_nl": "Welzijnsorganisaties",
+   "n": 12,
+   "household": false,
+   "who_nl": "draaien coaches op subsidie; de snelle koper",
+   "priors": {
+    "voice": 0.64,
+    "metric": 0.68,
+    "payer": 0.46,
+    "adopt": 0.66,
+    "trust": 0.5,
+    "queue": 0.6
+   },
+   "behav": {
+    "voice": 0.68,
+    "susceptibility": 0.52,
+    "conviction": 0.54
+   }
+  }
+ ],
+ "dims": [
+  {
+   "id": "voice",
+   "label_nl": "Het huishouden mag het dossier zien",
+   "left_nl": "een dossier is van de coach",
+   "right_nl": "het dossier is van ons",
+   "blurb_nl": "Het permissiemodel, gevraagd als mening in plaats van als beleid."
+  },
+  {
+   "id": "metric",
+   "label_nl": "Follow-through is de eerlijke maatstaf",
+   "left_nl": "kWh-besparing telt",
+   "right_nl": "afspraken tellen",
+   "blurb_nl": "Het meetargument waar de hele pitch op rust."
+  },
+  {
+   "id": "payer",
+   "label_nl": "De gemeente betaalt",
+   "left_nl": "de corporatie of leverancier betaalt",
+   "right_nl": "de gemeente betaalt",
+   "blurb_nl": "Wie het betaalt, gevraagd als mening."
+  },
+  {
+   "id": "adopt",
+   "label_nl": "De coach neemt spraaknotities op",
+   "left_nl": "ik typ het later",
+   "right_nl": "ik spreek het in",
+   "blurb_nl": "Wrijving bij het vastleggen is waar elke coachtool sterft."
+  },
+  {
+   "id": "trust",
+   "label_nl": "De gemeente is te vertrouwen",
+   "left_nl": "de gemeente ziet me als fraudeur",
+   "right_nl": "de gemeente helpt me",
+   "blurb_nl": "De voorwaarde voor de hele gemeentelijke route."
+  },
+  {
+   "id": "queue",
+   "label_nl": "Op dossiers sorteren mag",
+   "left_nl": "sorteer op datum",
+   "right_nl": "sorteer op wat blijft liggen",
+   "blurb_nl": "De enige plek waar het ontwerp eerlijkheid raakt: een caseload sorteren."
+  }
+ ],
+ "dim_stats": [
+  {
+   "dim": "voice",
+   "mean": 0.6243348451438906,
+   "sd": 0.0909479075952637,
+   "p10": 0.492784429985008,
+   "p50": 0.6281231806502311,
+   "p90": 0.7350401317191051,
+   "support_mean": 0.852791666666667,
+   "hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 0
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 0
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 0
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 0
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 6
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 17
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 24
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 29
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 38
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 37
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 30
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 18
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 1
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 0
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 0
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 0
+    }
+   ],
+   "support_hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 0
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 2
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 4
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 1
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 6
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 3
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 6
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 1
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 0
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 0
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 9
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 15
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 0
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 7
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 13
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 9
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 6
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 118
+    }
+   ]
+  },
+  {
+   "dim": "metric",
+   "mean": 0.5865637963090397,
+   "sd": 0.0739162600153704,
+   "p10": 0.4757746009286335,
+   "p50": 0.5778750949242801,
+   "p90": 0.6629526506515663,
+   "support_mean": 0.7871875,
+   "hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 0
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 0
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 0
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 0
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 0
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 40
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 15
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 52
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 38
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 37
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 18
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 0
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 0
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 0
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 0
+    }
+   ],
+   "support_hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 0
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 0
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 1
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 6
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 11
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 11
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 9
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 1
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 1
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 0
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 2
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 7
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 31
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 98
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 19
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 3
+    }
+   ]
+  },
+  {
+   "dim": "payer",
+   "mean": 0.5682017563416031,
+   "sd": 0.08217840408897494,
+   "p10": 0.45933480384895065,
+   "p50": 0.5722134437648094,
+   "p90": 0.6832604470633831,
+   "support_mean": 0.6918958333333337,
+   "hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 0
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 0
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 0
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 0
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 13
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 36
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 38
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 36
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 52
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 8
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 17
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 0
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 0
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 0
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 0
+    }
+   ],
+   "support_hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 5
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 5
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 2
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 4
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 7
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 8
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 6
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 7
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 5
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 0
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 5
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 29
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 61
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 34
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 10
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 12
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 0
+    }
+   ]
+  },
+  {
+   "dim": "adopt",
+   "mean": 0.5023266044006085,
+   "sd": 0.07924696565562671,
+   "p10": 0.3946263904836535,
+   "p50": 0.49904308616604265,
+   "p90": 0.6121266867445387,
+   "support_mean": 0.5248958333333337,
+   "hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 0
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 0
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 8
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 18
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 36
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 40
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 39
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 26
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 26
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 7
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 0
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 0
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 0
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 0
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 0
+    }
+   ],
+   "support_hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 8
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 16
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 5
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 1
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 0
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 14
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 15
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 3
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 6
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 3
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 5
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 35
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 13
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 31
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 11
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 15
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 12
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 3
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 4
+    }
+   ]
+  },
+  {
+   "dim": "trust",
+   "mean": 0.3743846960447554,
+   "sd": 0.10495991314440994,
+   "p10": 0.25310646810518544,
+   "p50": 0.36727974874022007,
+   "p90": 0.5027002533254201,
+   "support_mean": 0.16741666666666663,
+   "hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 3
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 8
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 9
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 35
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 30
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 29
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 42
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 23
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 11
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 10
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 0
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 0
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 0
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 0
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 0
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 0
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 0
+    }
+   ],
+   "support_hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 95
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 15
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 25
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 18
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 6
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 4
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 0
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 7
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 9
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 1
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 0
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 2
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 2
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 6
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 2
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 7
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 1
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 0
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 0
+    }
+   ]
+  },
+  {
+   "dim": "queue",
+   "mean": 0.5250115188757156,
+   "sd": 0.05376966523059769,
+   "p10": 0.44686648934630996,
+   "p50": 0.5277386682995413,
+   "p90": 0.6077196291375381,
+   "support_mean": 0.5666041666666666,
+   "hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 0
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 0
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 0
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 0
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 36
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 13
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 110
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 0
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 41
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 0
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 0
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 0
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 0
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 0
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 0
+    }
+   ],
+   "support_hist": [
+    {
+     "from": 0,
+     "to": 0.05,
+     "n": 0
+    },
+    {
+     "from": 0.05,
+     "to": 0.1,
+     "n": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.15,
+     "n": 0
+    },
+    {
+     "from": 0.15,
+     "to": 0.2,
+     "n": 4
+    },
+    {
+     "from": 0.2,
+     "to": 0.25,
+     "n": 25
+    },
+    {
+     "from": 0.25,
+     "to": 0.3,
+     "n": 17
+    },
+    {
+     "from": 0.3,
+     "to": 0.35,
+     "n": 3
+    },
+    {
+     "from": 0.35,
+     "to": 0.4,
+     "n": 0
+    },
+    {
+     "from": 0.4,
+     "to": 0.45,
+     "n": 0
+    },
+    {
+     "from": 0.45,
+     "to": 0.5,
+     "n": 6
+    },
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 28
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 45
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 21
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 9
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 1
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 0
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 4
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 28
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 9
+    }
+   ]
+  }
+ ],
+ "frequencies": [
+  {
+   "id": "QVOICE",
+   "question_nl": "Zou een meerderheid van de huishoudens een dossier accepteren dat ze kunnen zien?",
+   "question_en": "Would a majority of households accept a file they can see?",
+   "hits": 157,
+   "n": 200,
+   "p": 0.785,
+   "ci": {
+    "lo": 0.722976925984516,
+    "hi": 0.8362812378141752,
+    "p": 0.785,
+    "n": 200
+   },
+   "testable_n": 200,
+   "line": "QVOICE  157 / 200 runs (p = 0.785, 95% CI 0.723–0.836)"
+  },
+  {
+   "id": "QMETRIC",
+   "question_nl": "Zou een meerderheid follow-through accepteren als maatstaf?",
+   "question_en": "Would a majority accept follow-through as the metric?",
+   "hits": 170,
+   "n": 200,
+   "p": 0.85,
+   "ci": {
+    "lo": 0.7939442066666507,
+    "hi": 0.8928640646650752,
+    "p": 0.85,
+    "n": 200
+   },
+   "testable_n": 200,
+   "line": "QMETRIC  170 / 200 runs (p = 0.850, 95% CI 0.794–0.893)"
+  },
+  {
+   "id": "QPAYER",
+   "question_nl": "Zou een meerderheid zeggen dat de gemeente betaalt?",
+   "question_en": "Would a majority say the municipality pays?",
+   "hits": 162,
+   "n": 200,
+   "p": 0.81,
+   "ci": {
+    "lo": 0.7499876124094633,
+    "hi": 0.8583282850557797,
+    "p": 0.81,
+    "n": 200
+   },
+   "testable_n": 200,
+   "line": "QPAYER  162 / 200 runs (p = 0.810, 95% CI 0.750–0.858)"
+  },
+  {
+   "id": "QADOPT",
+   "question_nl": "Zou een meerderheid van de coaches met spraak vastleggen?",
+   "question_en": "Would a majority of coaches capture by voice?",
+   "hits": 171,
+   "n": 200,
+   "p": 0.855,
+   "ci": {
+    "lo": 0.7995133242038862,
+    "hi": 0.8971064938611499,
+    "p": 0.855,
+    "n": 200
+   },
+   "testable_n": 200,
+   "line": "QADOPT  171 / 200 runs (p = 0.855, 95% CI 0.800–0.897)"
+  },
+  {
+   "id": "QTRUST",
+   "question_nl": "Zou een meerderheid van de huishoudens de gemeente met het dossier vertrouwen?",
+   "question_en": "Would a majority of households trust the municipality with the file?",
+   "hits": 19,
+   "n": 200,
+   "p": 0.095,
+   "ci": {
+    "lo": 0.061663102507449205,
+    "hi": 0.14360161209441077,
+    "p": 0.095,
+    "n": 200
+   },
+   "testable_n": 200,
+   "line": "QTRUST  19 / 200 runs (p = 0.095, 95% CI 0.062–0.144)"
+  },
+  {
+   "id": "QSCANDAL",
+   "question_nl": "Verliest het permissiemodel na het lek zijn meerderheid?",
+   "question_en": "After the leak event, does the permission model lose its majority?",
+   "hits": 43,
+   "n": 65,
+   "p": 0.6615384615384615,
+   "ci": {
+    "lo": 0.5403837681802639,
+    "hi": 0.7646649675853523,
+    "p": 0.6615384615384615,
+    "n": 65
+   },
+   "testable_n": 65,
+   "line": "QSCANDAL  43 / 65 runs (p = 0.662, 95% CI 0.540–0.765)"
+  },
+  {
+   "id": "QSORT",
+   "question_nl": "Accepteert de populatie sorteren op dossiers?",
+   "question_en": "Does the population accept caseload sorting?",
+   "hits": 144,
+   "n": 200,
+   "p": 0.72,
+   "ci": {
+    "lo": 0.6540769535890598,
+    "hi": 0.7776311026765964,
+    "p": 0.72,
+    "n": 200
+   },
+   "testable_n": 200,
+   "line": "QSORT  144 / 200 runs (p = 0.720, 95% CI 0.654–0.778)"
+  }
+ ],
+ "events_seen": [
+  {
+   "id": "success",
+   "count": 76,
+   "label_nl": "Dordrecht publiceert opnieuw een daling: 5,1% → 4,4%"
+  },
+  {
+   "id": "grant",
+   "count": 73,
+   "label_nl": "Het rijk stelt €200 mln extra beschikbaar voor energiearmoede"
+  },
+  {
+   "id": "waitlist",
+   "count": 72,
+   "label_nl": "De wachtlijst voor de warmtetransitie groeit naar twee jaar"
+  },
+  {
+   "id": "fraud",
+   "count": 70,
+   "label_nl": "De gemeente kondigt fraudecontroles aan bij de energietoeslag"
+  },
+  {
+   "id": "shutoff",
+   "count": 67,
+   "label_nl": "Een gezin wordt afgesloten en het staat op de voorpagina"
+  },
+  {
+   "id": "leak",
+   "count": 65,
+   "label_nl": "Een coach deelt per ongeluk een dossier met een corporatie"
+  },
+  {
+   "id": "dutch",
+   "count": 65,
+   "label_nl": "De gemeente zet alle brieven om naar B1-niveau"
+  },
+  {
+   "id": "coachcut",
+   "count": 57,
+   "label_nl": "De gemeente schrapt de helft van de coachuren"
+  },
+  {
+   "id": "econobis",
+   "count": 55,
+   "label_nl": "Econobis kondigt een spraaknotitie-functie aan"
+  }
+ ],
+ "by_archetype": [
+  {
+   "key": "hh_nl",
+   "label_nl": "Nederlandse huishoudens",
+   "n": 58,
+   "mean": {
+    "voice": 0.6804462653660327,
+    "metric": 0.6314051028843037,
+    "payer": 0.7005727566323695,
+    "adopt": 0.5537043346088599,
+    "trust": 0.18654562709766662,
+    "queue": 0.5083577115955241
+   }
+  },
+  {
+   "key": "hh_mig",
+   "label_nl": "Migratieachtergrond",
+   "n": 34,
+   "mean": {
+    "voice": 0.5637679232155366,
+    "metric": 0.594518693010802,
+    "payer": 0.6532606455831192,
+    "adopt": 0.42078111267430246,
+    "trust": 0.09405891393641425,
+    "queue": 0.4417013902682779
+   }
+  },
+  {
+   "key": "hh_elderly",
+   "label_nl": "Oudere huishoudens",
+   "n": 26,
+   "mean": {
+    "voice": 0.6151529881025072,
+    "metric": 0.6463245823664454,
+    "payer": 0.6996760740569482,
+    "adopt": 0.3524481629458942,
+    "trust": 0.2423382227895787,
+    "queue": 0.5238703498010195
+   }
+  },
+  {
+   "key": "coach",
+   "label_nl": "Energiecoaches",
+   "n": 38,
+   "mean": {
+    "voice": 0.7876355235719875,
+    "metric": 0.7163499176096879,
+    "payer": 0.6674782461294798,
+    "adopt": 0.5941644346589531,
+    "trust": 0.21835664139445896,
+    "queue": 0.585728690886806
+   }
+  },
+  {
+   "key": "muni",
+   "label_nl": "Gemeente",
+   "n": 22,
+   "mean": {
+    "voice": 0.7374748525275646,
+    "metric": 0.6704680655281231,
+    "payer": 0.9102206985994986,
+    "adopt": 0.571759237354247,
+    "trust": 0.3249014134815096,
+    "queue": 0.6741747254734779
+   }
+  },
+  {
+   "key": "corp",
+   "label_nl": "Corporatie",
+   "n": 20,
+   "mean": {
+    "voice": 0.6838829133343215,
+    "metric": 0.5707458123244364,
+    "payer": 0.452538956556827,
+    "adopt": 0.5065475154269865,
+    "trust": 0.3061910424054228,
+    "queue": 0.6483527224694446
+   }
+  },
+  {
+   "key": "landlord",
+   "label_nl": "Private verhuurders",
+   "n": 16,
+   "mean": {
+    "voice": 0.6379135369308768,
+    "metric": 0.42279558699623715,
+    "payer": 0.3205729787758807,
+    "adopt": 0.368255647596794,
+    "trust": 0.1586080645448617,
+    "queue": 0.45133973643989633
+   }
+  },
+  {
+   "key": "supplier",
+   "label_nl": "Energieleveranciers",
+   "n": 14,
+   "mean": {
+    "voice": 0.6287465674659636,
+    "metric": 0.3420429728607345,
+    "payer": 0.409253646734853,
+    "adopt": 0.4551074520725928,
+    "trust": 0.09687681556977092,
+    "queue": 0.4177403426816132
+   }
+  },
+  {
+   "key": "welfare",
+   "label_nl": "Welzijnsorganisaties",
+   "n": 12,
+   "mean": {
+    "voice": 0.6939130383326328,
+    "metric": 0.7291990103253387,
+    "payer": 0.600004139756431,
+    "adopt": 0.6177548621959382,
+    "trust": 0.24949367935168118,
+    "queue": 0.6000974331968382
+   }
+  }
+ ],
+ "abstention": [
+  {
+   "key": "hh_nl",
+   "label_nl": "Nederlandse huishoudens",
+   "rate": 0.896551724137931,
+   "n": 58
+  },
+  {
+   "key": "hh_mig",
+   "label_nl": "Migratieachtergrond",
+   "rate": 0.9411764705882353,
+   "n": 34
+  },
+  {
+   "key": "hh_elderly",
+   "label_nl": "Oudere huishoudens",
+   "rate": 0.9230769230769231,
+   "n": 26
+  },
+  {
+   "key": "coach",
+   "label_nl": "Energiecoaches",
+   "rate": 0.7894736842105263,
+   "n": 38
+  },
+  {
+   "key": "muni",
+   "label_nl": "Gemeente",
+   "rate": 0.6363636363636364,
+   "n": 22
+  },
+  {
+   "key": "corp",
+   "label_nl": "Corporatie",
+   "rate": 0.75,
+   "n": 20
+  },
+  {
+   "key": "landlord",
+   "label_nl": "Private verhuurders",
+   "rate": 0.9375,
+   "n": 16
+  },
+  {
+   "key": "supplier",
+   "label_nl": "Energieleveranciers",
+   "rate": 0.7857142857142857,
+   "n": 14
+  },
+  {
+   "key": "welfare",
+   "label_nl": "Welzijnsorganisaties",
+   "rate": 0.9166666666666666,
+   "n": 12
+  }
+ ],
+ "falsifiers": [
+  {
+   "id": "F1",
+   "written_at": "2026-11-11T09:00:00Z",
+   "claim": "A majority of households would accept a visible, correctable file.",
+   "test": "QVOICE",
+   "expected": true,
+   "claim_holds_when": "frequency_gt_half",
+   "if_false": "The permission model is the product, and the population rejects it. The household view becomes a legal requirement we must argue for, not a feature we can lead with.",
+   "frequency_p": 0.785,
+   "hits": 157,
+   "n": 200,
+   "ci_lo": 0.722976925984516,
+   "ci_hi": 0.8362812378141752,
+   "claim_holds": true,
+   "would_break_pitch": false,
+   "reading_en": "The claim holds."
+  },
+  {
+   "id": "F2",
+   "written_at": "2026-11-11T09:00:00Z",
+   "claim": "Follow-through beats kWh as the metric they would accept.",
+   "test": "QMETRIC",
+   "expected": true,
+   "claim_holds_when": "frequency_gt_half",
+   "if_false": "The honesty argument fails with the people it protects: they want the number the funder wants. Rework the impact story.",
+   "frequency_p": 0.85,
+   "hits": 170,
+   "n": 200,
+   "ci_lo": 0.7939442066666507,
+   "ci_hi": 0.8928640646650752,
+   "claim_holds": true,
+   "would_break_pitch": false,
+   "reading_en": "The claim holds."
+  },
+  {
+   "id": "F3",
+   "written_at": "2026-11-11T09:00:00Z",
+   "claim": "Households trust the municipality enough to accept the route.",
+   "test": "QTRUST",
+   "expected": true,
+   "claim_holds_when": "frequency_gt_half",
+   "if_false": "Municipal route collapses; the welfare organisation becomes the only viable first customer.",
+   "frequency_p": 0.095,
+   "hits": 19,
+   "n": 200,
+   "ci_lo": 0.061663102507449205,
+   "ci_hi": 0.14360161209441077,
+   "claim_holds": false,
+   "would_break_pitch": true,
+   "reading_en": "Municipal route collapses; the welfare organisation becomes the only viable first customer."
+  },
+  {
+   "id": "F4",
+   "written_at": "2026-11-11T09:00:00Z",
+   "claim": "A coach would capture by voice.",
+   "test": "QADOPT",
+   "expected": true,
+   "claim_holds_when": "frequency_gt_half",
+   "if_false": "Capture friction kills the product; the input becomes a form after all.",
+   "frequency_p": 0.855,
+   "hits": 171,
+   "n": 200,
+   "ci_lo": 0.7995133242038862,
+   "ci_hi": 0.8971064938611499,
+   "claim_holds": true,
+   "would_break_pitch": false,
+   "reading_en": "The claim holds."
+  },
+  {
+   "id": "F5",
+   "written_at": "2026-11-11T09:00:00Z",
+   "claim": "The permission model survives a leak story.",
+   "test": "QSCANDAL",
+   "expected": false,
+   "claim_holds_when": "frequency_le_half",
+   "if_false_but_expected_false": "Resilient. If TRUE the design is fragile to one incident and we say so.",
+   "frequency_p": 0.6615384615384615,
+   "hits": 43,
+   "n": 65,
+   "ci_lo": 0.5403837681802639,
+   "ci_hi": 0.7646649675853523,
+   "claim_holds": false,
+   "would_break_pitch": true,
+   "reading_en": "Resilient. If TRUE the design is fragile to one incident and we say so."
+  },
+  {
+   "id": "F6",
+   "written_at": "2026-11-11T09:00:00Z",
+   "claim": "The population accepts caseload sorting.",
+   "test": "QSORT",
+   "expected": true,
+   "claim_holds_when": "frequency_gt_half",
+   "if_false": "The queue must stay date-ordered. This is the cheapest finding to act on: change one control.",
+   "frequency_p": 0.72,
+   "hits": 144,
+   "n": 200,
+   "ci_lo": 0.6540769535890598,
+   "ci_hi": 0.7776311026765964,
+   "claim_holds": true,
+   "would_break_pitch": false,
+   "reading_en": "The claim holds."
+  }
+ ],
+ "event_catalogue": [
+  {
+   "id": "shutoff",
+   "label_nl": "Een gezin wordt afgesloten en het staat op de voorpagina",
+   "detail_nl": "De foto is van de slaapkamer van een kind.",
+   "effect": {
+    "trust": -0.08,
+    "voice": 0.1,
+    "metric": 0.06
+   }
+  },
+  {
+   "id": "grant",
+   "label_nl": "Het rijk stelt €200 mln extra beschikbaar voor energiearmoede",
+   "detail_nl": "Gemeenten moeten het binnen 18 maanden uitgeven.",
+   "effect": {
+    "payer": 0.12,
+    "adopt": 0.06
+   }
+  },
+  {
+   "id": "econobis",
+   "label_nl": "Econobis kondigt een spraaknotitie-functie aan",
+   "detail_nl": "De gevestigde partij beweegt naar dit terrein.",
+   "effect": {
+    "adopt": -0.1,
+    "payer": -0.04
+   }
+  },
+  {
+   "id": "leak",
+   "label_nl": "Een coach deelt per ongeluk een dossier met een corporatie",
+   "detail_nl": "Screenshot in een WhatsApp-groep van de buurt.",
+   "effect": {
+    "voice": -0.14,
+    "trust": -0.1,
+    "queue": -0.08
+   }
+  },
+  {
+   "id": "success",
+   "label_nl": "Dordrecht publiceert opnieuw een daling: 5,1% → 4,4%",
+   "detail_nl": "Het model wordt opnieuw publiek bewezen.",
+   "effect": {
+    "metric": 0.1,
+    "payer": 0.08,
+    "trust": 0.05
+   }
+  },
+  {
+   "id": "waitlist",
+   "label_nl": "De wachtlijst voor de warmtetransitie groeit naar twee jaar",
+   "detail_nl": "Isolatiecapaciteit is de bottleneck, niet geld.",
+   "effect": {
+    "metric": -0.08,
+    "voice": 0.04
+   }
+  },
+  {
+   "id": "fraud",
+   "label_nl": "De gemeente kondigt fraudecontroles aan bij de energietoeslag",
+   "detail_nl": "Gebracht als \"eerlijk voor iedereen\".",
+   "effect": {
+    "trust": -0.16,
+    "voice": -0.06,
+    "adopt": -0.05
+   }
+  },
+  {
+   "id": "dutch",
+   "label_nl": "De gemeente zet alle brieven om naar B1-niveau",
+   "detail_nl": "Een klein ding dat de bereikbaarheid verandert.",
+   "effect": {
+    "trust": 0.08,
+    "voice": 0.04
+   }
+  },
+  {
+   "id": "coachcut",
+   "label_nl": "De gemeente schrapt de helft van de coachuren",
+   "detail_nl": "De caseload verdubbelt van de ene dag op de andere.",
+   "effect": {
+    "adopt": 0.12,
+    "queue": 0.08,
+    "payer": -0.06
+   }
+  }
+ ],
+ "tests": [
+  {
+   "id": "QVOICE",
+   "question_nl": "Zou een meerderheid van de huishoudens een dossier accepteren dat ze kunnen zien?",
+   "question_en": "Would a majority of households accept a file they can see?",
+   "scope": "hh",
+   "dim": "voice"
+  },
+  {
+   "id": "QMETRIC",
+   "question_nl": "Zou een meerderheid follow-through accepteren als maatstaf?",
+   "question_en": "Would a majority accept follow-through as the metric?",
+   "scope": "all",
+   "dim": "metric"
+  },
+  {
+   "id": "QPAYER",
+   "question_nl": "Zou een meerderheid zeggen dat de gemeente betaalt?",
+   "question_en": "Would a majority say the municipality pays?",
+   "scope": "all",
+   "dim": "payer"
+  },
+  {
+   "id": "QADOPT",
+   "question_nl": "Zou een meerderheid van de coaches met spraak vastleggen?",
+   "question_en": "Would a majority of coaches capture by voice?",
+   "scope": "coach",
+   "dim": "adopt"
+  },
+  {
+   "id": "QTRUST",
+   "question_nl": "Zou een meerderheid van de huishoudens de gemeente met het dossier vertrouwen?",
+   "question_en": "Would a majority of households trust the municipality with the file?",
+   "scope": "hh",
+   "dim": "trust"
+  },
+  {
+   "id": "QSCANDAL",
+   "question_nl": "Verliest het permissiemodel na het lek zijn meerderheid?",
+   "question_en": "After the leak event, does the permission model lose its majority?",
+   "scope": "hh",
+   "dim": "voice",
+   "needsRunFired": "leak"
+  },
+  {
+   "id": "QSORT",
+   "question_nl": "Accepteert de populatie sorteren op dossiers?",
+   "question_en": "Does the population accept caseload sorting?",
+   "scope": "all",
+   "dim": "queue"
+  }
+ ],
+ "honesty": [
+  "GEEN LLM",
+  "SYNTHETISCH",
+  "GEEN VOORSPELLING",
+  "PRIOREN ZIJN AANNAMES"
+ ]
+}
