@@ -57,7 +57,9 @@ export function ActionRow({
           >
             {s.glyph}
           </span>
-          <span style={{ fontSize: 14, fontWeight: 500 }}>{action.what_nl}</span>
+          <span style={{ fontSize: 14, fontWeight: 500 }} lang="nl">
+            {action.what_nl}
+          </span>
         </span>
         <span className={`pill ${s.class}`}>{t(s.label)}</span>
       </div>
@@ -78,12 +80,12 @@ export function ActionRow({
         </span>
       </div>
       {action.status === "niet_gedaan" && action.evidence && (
-        <div className="small" style={{ marginTop: 6, color: "var(--warm)" }}>
+        <div className="small" style={{ marginTop: 6, color: "var(--warm)" }} lang="nl">
           → &ldquo;{action.evidence}&rdquo;
         </div>
       )}
       {action.status === "gedaan" && action.evidence && (
-        <div className="small muted" style={{ marginTop: 6 }}>
+        <div className="small muted" style={{ marginTop: 6 }} lang="nl">
           → {action.evidence}
         </div>
       )}

@@ -14,6 +14,8 @@ const SORT_KEYS: { key: SortKey }[] = [
  * "Sorteert op het dossier, niet op de persoon."
  */
 export interface CaseTableLabels {
+  /** English pages mark the Dutch names so a screen reader switches voice. */
+  lang: string;
   sortStale: string;
   sortOpen: string;
   sortNever: string;
@@ -36,6 +38,7 @@ export interface CaseTableLabels {
  *  the browser for a table with eight column headers. So the server sends the
  *  fourteen strings this table actually prints. */
 export function CaseTable({ rows, labels }: { rows: CaseRow[]; labels: CaseTableLabels }) {
+  const nl = labels.lang === "nl" ? undefined : "nl";
   const [sort, setSort] = useState<SortKey>("staleness");
   const router = useRouter();
 
@@ -97,7 +100,7 @@ export function CaseTable({ rows, labels }: { rows: CaseRow[]; labels: CaseTable
                 title={labels.rowTitle}
               >
                 <td>
-                  <div style={{ fontWeight: hasHistory(r) ? 500 : 400 }}>
+                  <div style={{ fontWeight: hasHistory(r) ? 500 : 400 }} lang={nl}>
                     {hasHistory(r) ? (
                       <span className="linkish">{r.display_nl}</span>
                     ) : (
@@ -106,7 +109,9 @@ export function CaseTable({ rows, labels }: { rows: CaseRow[]; labels: CaseTable
                   </div>
                   <div className="mono small muted">{r.ref}</div>
                 </td>
-                <td className="small">{r.hood}</td>
+                <td className="small" lang={nl}>
+                  {r.hood}
+                </td>
                 <td className="num mono">{r.label}</td>
                 <td className="num mono" style={r.days_since_contact > 270 ? { color: "var(--warm)" } : undefined}>
                   {r.days_since_contact}

@@ -9,7 +9,7 @@ import { ARCH, DIMENSIONS, N_AGENTS } from "@/domain/swarm/archetypes";
 export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
-  const { t } = await getI18n(await searchParams);
+  const { locale, t } = await getI18n(await searchParams);
   const rows = (await import("@data/cases.json")).default as CaseRow[];
   const households = (await import("@data/households.json")).default as unknown as Household[];
   const today = todayIso();
@@ -100,6 +100,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ l
             <CaseTable
               rows={rows}
               labels={{
+                lang: locale,
                 sortStale: t("home.queue.sort.stale"),
                 sortOpen: t("home.queue.sort.open"),
                 sortNever: t("home.queue.sort.never"),
@@ -127,7 +128,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ l
                 {stale.map(({ h, days }) => (
                   <Link key={h.household_ref} href={`/household/${h.household_ref}`} className="row between" style={{ gap: 10 }}>
                     <span style={{ minWidth: 0 }}>
-                      <span style={{ display: "block", fontSize: 13 }}>{h.display_nl}</span>
+                      <span style={{ display: "block", fontSize: 13 }} lang={locale === "nl" ? undefined : "nl"}>
+                        {h.display_nl}
+                      </span>
                       <span className="mono small muted">{h.household_ref}</span>
                     </span>
                     <span className={`pill ${days > 270 ? "dropped" : ""} mono`}>{days}d</span>
@@ -196,8 +199,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ l
                     <span className="mono small muted">{h.household_ref}</span>
                     <span className="pill mono">label {h.label}</span>
                   </div>
-                  <div style={{ fontWeight: 500, marginTop: 4 }}>{h.display_nl}</div>
-                  <div className="small muted">{h.composition_nl}</div>
+                  <div style={{ fontWeight: 500, marginTop: 4 }} lang={locale === "nl" ? undefined : "nl"}>
+                    {h.display_nl}
+                  </div>
+                  <div className="small muted" lang={locale === "nl" ? undefined : "nl"}>
+                    {h.composition_nl}
+                  </div>
                   <div className="row wrap" style={{ gap: 4, marginTop: 10 }}>
                     <span className="pill done">{t("home.cases.done", { n: h.actions.filter((a) => a.status === "gedaan").length })}</span>
                     <span className="pill">{t("home.cases.open", { n: o.length })}</span>
@@ -245,17 +252,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ l
           <div className="card card-pad">
             <h2>{t("home.stages.title")}</h2>
             <ol className="small" style={{ marginTop: 8, paddingLeft: 18, lineHeight: 1.8 }}>
-              {[
+              {([
                 ["INPUT", "home.stages.1"],
                 ["MODEL", "home.stages.2"],
                 ["GATE", "home.stages.3"],
-                ["MENS", "home.stages.4"],
-                ["OPSLAG", "home.stages.5"],
+                ["home.stage.human", "home.stages.4"],
+                ["home.stage.storage", "home.stages.5"],
                 ["OUTPUT", "home.stages.6"],
-                ["MENS", "home.stages.7"],
-              ].map(([name, key]) => (
+                ["home.stage.human", "home.stages.7"],
+              ] as [DictKey | string, DictKey][]).map(([name, key]) => (
                 <li key={key}>
-                  <strong>{name}</strong> {t(key as DictKey)}
+                  {/* The stage names are UI, not data: MENS/OPSLAG are the Dutch
+                      words and read as untranslated leftovers on an English
+                      page, which is exactly how they were found. */}
+                  <strong>{name.includes(".") ? t(name as DictKey) : name}</strong> {t(key)}
                 </li>
               ))}
             </ol>

@@ -206,7 +206,7 @@ export function CaptureClient({ notes, locale }: { notes: NoteFixture[]; locale:
               </label>
               <select id="hh" className="field" value={household} onChange={(e) => setHousehold(e.target.value)}>
                 {HOUSEHOLDS.map((h) => (
-                  <option key={h.ref} value={h.ref}>
+                  <option key={h.ref} value={h.ref} lang="nl">
                     {h.label}
                   </option>
                 ))}
@@ -412,6 +412,7 @@ export function CaptureClient({ notes, locale }: { notes: NoteFixture[]; locale:
                 </div>
                 <input
                   className="field"
+                  lang="nl"
                   value={whatEdits[a.action_id] ?? a.what_nl}
                   onChange={(e) => setWhatEdits((p) => ({ ...p, [a.action_id]: e.target.value }))}
                   aria-label={t("cap.action_aria", { id: a.action_id })}
@@ -432,7 +433,7 @@ export function CaptureClient({ notes, locale }: { notes: NoteFixture[]; locale:
                 <div className="stack tight" style={{ marginTop: 6 }}>
                   {draft.barriers.map((b: DraftBarrier) => (
                     <div key={b.barrier_id} className="row between" style={{ gap: 8 }}>
-                      <span style={{ fontSize: 13 }}>
+                      <span style={{ fontSize: 13 }} lang="nl">
                         <span className="pill mono" style={{ marginRight: 6 }}>
                           {b.kind}
                         </span>

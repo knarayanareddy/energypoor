@@ -171,9 +171,17 @@ describe("W12 / T-12 — every simulated or restricted value says so", () => {
     // Every honesty mark is bilingual now. The Dutch string is the contract, so
     // it is asserted directly; the English mirror must not silently drop one,
     // which is what the second loop holds.
+    //
+    // This assertion used to require the *English* sentence — "demo — synthetic
+    // households" — inside the Dutch dictionary, so the disclaimer at the
+    // bottom of every Dutch screen was in English and the test enforced it. The
+    // Dutch half now says so in Dutch, and the English sentence is checked
+    // where it belongs: in the English half.
     const nl = DICTS.nl;
-    expect(nl["honesty.demo"].toLowerCase()).toContain("demo — synthetic households");
+    expect(nl["honesty.demo"].toLowerCase()).toContain("demo — synthetische huishoudens");
     expect(nl["common.synthetic"].toLowerCase()).toContain("synthetisch");
+    expect(DICTS.en["honesty.demo"].toLowerCase()).toContain("demo — synthetic households");
+    expect(nl["honesty.demo"]).not.toBe(DICTS.en["honesty.demo"]);
     const layout = readFileSync("src/app/layout.tsx", "utf8");
     expect(layout).toContain('t("honesty.demo")');
 

@@ -147,7 +147,7 @@ export default async function SurveyPage({ searchParams }: { searchParams: Promi
                 <tr>
                   <th>{t("su.item")}</th>
                   {sample.map((s) => (
-                    <th key={s.persona.id}>
+                    <th key={s.persona.id} lang="nl">
                       {s.persona.name_nl}
                       <div className="mono small muted">{s.persona.archetype}</div>
                     </th>
@@ -159,7 +159,9 @@ export default async function SurveyPage({ searchParams }: { searchParams: Promi
                   <tr key={it.id}>
                     <td>
                       <span className="mono small muted">{it.no}</span>{" "}
-                      <span title={it.text_nl}>{clamp60(it.text_nl)}</span>
+                      <span title={it.text_nl} lang="nl">
+                        {clamp60(it.text_nl)}
+                      </span>
                     </td>
                     {sample.map((s) => {
                       const a = s.answers.find((x) => x.item === it.id);
@@ -176,6 +178,7 @@ export default async function SurveyPage({ searchParams }: { searchParams: Promi
                         <td
                           key={s.persona.id}
                           className="mono small"
+                          lang="nl"
                           style={a?.abstained ? { color: "var(--warm)" } : undefined}
                         >
                           {text}

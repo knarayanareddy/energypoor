@@ -54,7 +54,11 @@ export default async function VerifyPage({ searchParams }: { searchParams: Promi
                 overflowX: "auto",
                 lineHeight: 1.55,
               }}
-            >{`// canonieke JSON: sleutels gesorteerd op elk niveau, dan sha256 over de exacte string
+            >{`${
+              locale === "nl"
+                ? "// canonieke JSON: sleutels gesorteerd op elk niveau, dan sha256 over de exacte string"
+                : "// canonical JSON: keys sorted at every level, then sha256 over the exact string"
+            }
 hash = sha256(canonicalJson({ seq, ts, actor, action, subject, payload, prev_hash }))`}</pre>
             <p className="small muted">
               {t("ver.how.body1", { open: "O_APPEND", seq: "seq", prev: "prev_hash" })}

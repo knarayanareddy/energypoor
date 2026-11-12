@@ -34,7 +34,7 @@ Acceptance criteria that need a browser are measured, not inferred. With `npm ru
 running:
 
 ```bash
-npm run test:browser                    # 12 real-browser checks in both languages, ~4.5 min
+npm run test:browser                    # 13 real-browser checks in both languages, ~4.5 min
 ```
 
 It drives a real Chromium (`@sparticuz/chromium` vendors the binary inside its npm tarball; the
@@ -45,14 +45,16 @@ NSS symbols it needs are stubbed with gcc because this container has no libnss3)
 A1, A2, A2b, A3, A4, A11 and the mobile-nav check each run **twice — once per language** — because
 the English mirror is only real if it is measured. **B** asserts that every screen renders in the
 language it was asked for, that the tab title follows it, and that the three pages showing Dutch
-case content carry the note explaining why. **B2** is the one that matters most: it opens the app
+case content carry the note explaining why. **B3** walks every route in Dutch and fails if the
+navigation or a heading still contains a borrowed English word — the check that was missing when
+the Dutch interface shipped half English. **B2** is the one that matters most: it opens the app
 inside a frame on another site, where a cookie cannot be written at all, and asserts that the
 toggle still switches the whole document — `<html lang>`, tab title and top bar, not just the
 body — and that the next link click keeps the choice.
 See `REVIEW.md` §6.1 for the three real defects this found and the two ways my own harness lied
 first.
 
-Current state, verified in this checkout: `tsc` clean, **107/107 tests** plus **12/12 browser
+Current state, verified in this checkout: `tsc` clean, **107/107 tests** plus **13/13 browser
 checks**, `next build` exit 0 over 9 screens and 12 API routes, chain `9/9`, and the committed
 ensemble breaking **F3 and F5**.
 
@@ -73,8 +75,11 @@ cookie (`vervolg-locale`) is a best-effort optimisation for plain link navigatio
 `B2` now pins it by opening the app inside a cross-site frame.
 
 What is translated is the **interface**: navigation, headings, labels, empty states, error
-sentences, the review, the lab's ten panels. What is **not** translated is the dossier content,
-and that is a design decision, not an omission:
+sentences, the review, the lab's ten panels. The Dutch half of that interface is genuinely Dutch —
+`Dossiers`, `Zwermlab`, `Opvolgdekking` — because a borrowed English word is not a translation.
+
+What is **not** translated is the dossier content, and that is a design decision, not an omission.
+On an English screen it is marked `lang="nl"` and carries a line saying why it is Dutch:
 
 | Stays Dutch | Why |
 |---|---|

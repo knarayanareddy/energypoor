@@ -308,6 +308,55 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
    *      be stored, because the language travels in the URL and is forwarded
    *      from the Referer.
    */
+  /**
+   * The other direction: a Dutch page must be Dutch.
+   *
+   * The suite asserted, thoroughly, that an English page is English. Nothing
+   * asserted that a *Dutch* page is Dutch — so the Dutch navigation shipped
+   * reading "Caseload · Swarm Lab · Audit · Review", and the honesty
+   * disclaimer at the bottom of every screen was an English sentence. A Dutch
+   * coach using this product would have seen a half-translated interface and
+   * been right to call it unfinished.
+   *
+   * A word-for-word translation checker is not possible here, so this asserts
+   * the specific borrowed English words that were actually in the Dutch copy.
+   * It is a regression guard, not a proof of fluency.
+   */
+  it("B3 — a Dutch page contains no English UI words", async () => {
+    if (!available) return;
+    const bad: string[] = [];
+    // Words that appeared in the Dutch copy and are simply not Dutch. Product
+    // names (Vervolg) and code (`O_APPEND`) are not in this list on purpose.
+    const ENGLISH_ONLY = ["Caseload", "Swarm Lab", "Follow-through coverage", "synthetic households"];
+    for (const route of ROUTES) {
+      const page = await browser.newPage();
+      await setLocale(page, "nl");
+      await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
+      const m = (await page.evaluate(`(() => {
+        // Only what a reader can see: trim the RSC payload, which carries both
+        // dictionaries by design and would match every word.
+        const main = document.querySelector("main");
+        const chrome = document.querySelector(".shell");
+        return {
+          lang: document.documentElement.getAttribute("lang"),
+          nav: [...document.querySelectorAll(".nav a")].map(a => a.textContent.trim()).join("|"),
+          text: (chrome ? chrome.innerText : document.body.innerText) || "",
+          h1: (main && main.querySelector("h1") ? main.querySelector("h1").textContent : "") || "",
+        };
+      })()`)) as { lang: string; nav: string; text: string; h1: string };
+      if (m.lang !== "nl") bad.push(`${route}: default language is ${m.lang}`);
+      for (const w of ENGLISH_ONLY) {
+        // `main` on /review quotes English deliberately (the spec is Dutch, the
+        // review argues in English about Dutch text). Only the chrome and the
+        // headings are asserted here.
+        if (m.nav.includes(w)) bad.push(`${route}: Dutch nav contains "${w}"`);
+        if (m.h1.includes(w)) bad.push(`${route}: Dutch heading contains "${w}"`);
+      }
+      await page.close();
+    }
+    expect(bad).toEqual([]);
+  }, 180000);
+
   it("B2 — the toggle works inside a cross-site frame, where cookies are blocked", async () => {
     if (!available) return;
     const { createServer } = await import("node:http");

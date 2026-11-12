@@ -6,6 +6,7 @@ import { buildBrief, formatDateLongNl, formatDateNl, monthsAgoNl, restrictedFiel
 import { ActionRow } from "@/components/ActionRow";
 import { RestrictedMarker } from "@/components/RestrictedMarker";
 import { getI18n } from "@/i18n/server";
+import { DutchContent, Nl } from "@/components/DutchContent";
 
 export const dynamic = "force-dynamic";
 
@@ -39,9 +40,11 @@ export default async function HouseholdPage({
               </Link>{" "}
               / {h.household_ref}
             </div>
-            <h1 style={{ marginTop: 4 }}>{h.display_nl}</h1>
+            <h1 style={{ marginTop: 4 }}>
+              <Nl locale={locale}>{h.display_nl}</Nl>
+            </h1>
             <div className="row wrap small muted" style={{ marginTop: 6, gap: 10 }}>
-              <span>{h.composition_nl}</span>
+              <Nl locale={locale}>{h.composition_nl}</Nl>
               <span>·</span>
               <span>{h.tenure}</span>
               <span>·</span>
@@ -59,6 +62,12 @@ export default async function HouseholdPage({
             </Link>
           </div>
         </div>
+
+        {locale === "en" && (
+          <p className="small muted" data-testid="artefact-note" style={{ marginTop: -4 }}>
+            {t("common.dossier_note")}
+          </p>
+        )}
 
         {brief.stale_days > STALE_DAYS && (
           <div className="note-box" style={{ borderLeftColor: "var(--warm)" }}>
@@ -143,7 +152,7 @@ export default async function HouseholdPage({
                       <span className="pill mono" style={{ marginRight: 6 }}>
                         {b.kind}
                       </span>
-                      <span className={b.restricted ? "muted" : ""} style={{ fontSize: 13 }}>
+                      <span className={b.restricted ? "muted" : ""} style={{ fontSize: 13 }} lang="nl">
                         {b.note_nl}
                       </span>
                     </span>
@@ -167,7 +176,7 @@ export default async function HouseholdPage({
                     </div>
                     <div>
                       {c.target} <span className="mono">{c.target_id}</span> → <strong>{c.field}</strong>:{" "}
-                      <span className="muted">{c.from ?? "—"}</span> → {c.to ?? "—"}
+                      <span className="muted" lang="nl">{c.from ?? "—"}</span> → <span lang="nl">{c.to ?? "—"}</span>
                     </div>
                   </div>
                 ))}
@@ -198,7 +207,9 @@ export default async function HouseholdPage({
                       )}
                     </span>
                   </div>
-                  <p style={{ marginTop: 6, fontSize: 13.5 }}>{v.transcript}</p>
+                  <p style={{ marginTop: 6, fontSize: 13.5 }} lang="nl">
+                    {v.transcript}
+                  </p>
                   {v.corrections.length > 0 && (
                     <div className="small" style={{ marginTop: 6, color: "var(--warm)" }}>
                       {t("hh.visit.corrections", { n: v.corrections.length })}

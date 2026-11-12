@@ -22,13 +22,13 @@ in every case the implementation changed.
 |---|---|
 | Spec sections implemented | §0 – §19 |
 | Routes | 9 screens + 12 API routes, all 200 |
-| Tests | **107 green** in 7 files, plus **12 browser-measured** checks in a separate suite, each run in both languages |
+| Tests | **107 green** in 7 files, plus **13 browser-measured** checks in a separate suite, each run in both languages |
 | `next build` | exits 0 |
 | Browser | real Chromium; A1/A2/A3/A4/A11/A12 measured, not inferred |
 | `scripts/verify-chain.ts` | `total=9 verified=9 brokenAt=null` |
 | Restricted leakage | **0** across brief, family view, CSV, API and extractor output |
 | Falsifiers breaking the pitch | **2 of 6** (F3 trust, F5 leak) |
-| Deviations | 14, all listed in §3 |
+| Deviations | 15, all listed in §3 |
 
 ---
 
@@ -306,6 +306,59 @@ English. If a future change weakens the toggle back to a cookie, or back to `rou
 in the environment that matters. Twelve green checks said the feature worked; the one that framed
 the app was the only one telling the truth.
 
+### D-16 · The Dutch interface was half English, and the tests certified it
+
+Reported as: *"comeon i want everything to be in dutch/english — there are so many parts that
+aren't"*, with the word `Caseload` marked in the paste. It was two separate failures facing opposite
+directions.
+
+**The Dutch page contained English UI.** The navigation read *Caseload · Swarm Lab · Audit · Review*;
+the breadcrumb on every household page said *Caseload*; the honesty disclaimer at the bottom of every
+screen was the English sentence *"Demo — synthetic households. No real person's data is in this
+build."*; the coverage tile was titled *Follow-through coverage*; the home page eyebrow opened with
+*Caseload*; and two stage names in "the seven stages" were *MENS* and *OPSLAG*.
+
+None of that is dossier content. It is **interface**, and the interface is supposed to follow the
+reader. A Dutch coach reading this product would have been right to call it unfinished.
+
+**The English page contained unmarked Dutch.** On `/household/HH-014` with `?lang=en`, the action
+text, the evidence sentences, the barriers and the visit transcripts all rendered Dutch with no
+`lang="nl"` and no explanation. The toggle said EN, the chrome agreed, and the middle of the page
+was Dutch — which reads as a broken translation rather than a decision. The brief and family pages
+had done this correctly from the start; the household page never got the treatment.
+
+**Why the tests said it was fine.** Three separate holes, each of which is now closed:
+
+1. `src/test/i18n.test.ts` held a `sameAllowed` list of keys permitted to be identical in both
+   halves, described as *"words that are the same in both languages"*. It contained `nav.caseload`
+   ("Caseload"), `nav.swarm` ("Swarm Lab") and `hh.crumb`. **The test was ratifying the bug**: the
+   Dutch nav was English, and the assertion whose job was to catch exactly that had been taught to
+   accept it. Removed; the Dutch half now says *Dossiers* and *Zwermlab*.
+2. The test that Dutch fixtures are marked as Dutch checked only `brief/page.tsx` and
+   `family/page.tsx` — never `household/[id]/page.tsx`, the page that had the problem. The household
+   page, its `ActionRow` component and the new `common.dossier_note` sentence are now asserted.
+3. The Swarm Lab event translations were checked against a **hand-written list of ids** in the test,
+   and the list omitted `fraud`. The English lab showed the Dutch fraud sentence, and the test's
+   name — "Swarm Lab copy is complete in both languages" — was false. The loop now iterates the
+   engine's own `EVENTS` catalogue, so a new event cannot exist without a translation in both halves.
+
+`W12` deserves its own note: it asserted that the Dutch dictionary's `honesty.demo` **contains the
+English sentence**, so the English disclaimer on every Dutch page was not an oversight that slipped
+through — it was enforced.
+
+**The fix.** Dutch UI words translated (`Dossiers`, `Zwermlab`, `Opvolgdekking`, the disclaimer, the
+meta description, `MENS`/`OPSLAG` → `HUMAN`/`STORAGE` in English). Dossier content marked with
+`lang="nl"` wherever it appears, through one shared `DutchContent`/`Nl` component rather than
+twenty hand-edited call sites, plus a single visible `common.dossier_note` on the household page
+instead of a note per field.
+
+**The new check is the point.** B3 walks every route in Dutch and fails if the navigation or any
+heading contains `Caseload`, `Swarm Lab`, `Follow-through coverage` or `synthetic households`. The
+suite had always asserted that an English page is English, thoroughly and in detail; nothing had ever
+asserted that a **Dutch** page is Dutch. That asymmetry is the whole reason a bilingual product can
+ship half-translated and still be told it is green. A word-for-word checker is not possible, so B3
+guards the specific words that were actually wrong — a regression guard, not proof of fluency.
+
 ---
 
 ## 4. Numbers this build actually produces
@@ -412,7 +465,7 @@ binary can be obtained without violating the network policy:
    stubs and the file says so.
 3. `src/test-browser/measure.test.ts` drives it with `puppeteer-core`.
 
-Results, from `npm run test:browser` (12 checks, ~4.5 min, every route measured in **both**
+Results, from `npm run test:browser` (13 checks, ~4.5 min, every route measured in **both**
 languages):
 
 | | Measured |

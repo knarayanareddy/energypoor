@@ -10,6 +10,7 @@ import {
   t,
   type DictKey,
 } from "../i18n/dict";
+import { EVENTS } from "../domain/swarm/engine";
 import { fill, swarmCopy } from "../i18n/swarm";
 import { coverageRows } from "../i18n/survey";
 import { apiMessage, localeFromRequest } from "../i18n/api";
@@ -51,29 +52,27 @@ describe("B — the English mirror is complete", () => {
     // Some keys are identical on purpose, and the list is curated rather than
     // derived from whatever currently passes — otherwise this test would ratify
     // its own blind spots. Three kinds are allowed:
-    //   * words that are the same in both languages: Instrument, Audit, Review,
-    //     Caseload, Export, Item, Lab, Report, Label, Open, Seq, Ts, Actor,
-    //     Subject, Hash, "demo transcript — no ASR called", "STOP"
+    //   * words that are genuinely the same in both languages: Instrument,
+    //     Audit, Review, Export, Item, Lab, Report, Label, Open, Seq, Ts,
+    //     Actor, Subject, Hash, "demo transcript — no ASR called", "STOP"
     //   * language names in their own language: English, Nederlands
-    //   * English copy that is deliberately the same string in both halves
-    //     because it is an English quotation from the spec, or the product
-    //     description
+    //
+    // This list used to contain `nav.caseload` ("Caseload"), `nav.swarm`
+    // ("Swarm Lab") and `hh.crumb`, so the Dutch navigation read "Caseload ·
+    // Swarm Lab" for a Dutch coach and this test called it correct. It was
+    // ratifying the bug. A borrowed English word is not a translation: the
+    // Dutch half now says "Dossiers" and "Zwermlab".
+    //
     // Anything else appearing here means a key was added to `en` by pasting the
     // Dutch line across — the exact failure this test exists to catch.
     const sameAllowed = new Set<string>([
       "brand.name",
       "meta.description",
-      "nav.caseload",
-      "nav.swarm",
       "nav.instrument",
       "nav.audit",
       "nav.review",
       "lang.to_en",
       "lang.to_nl",
-      "lang.current_en",
-      "honesty.demo",
-      "home.cta.swarm",
-      "home.tile.coverage",
       "home.cases.open",
       "home.cases.brief",
       "col.label",
@@ -84,7 +83,6 @@ describe("B — the English mirror is complete", () => {
       "col.action",
       "col.subject",
       "col.hash",
-      "hh.crumb",
       "hh.who.coach",
       "cap.demo.chip",
       "cap.rec.stop",
@@ -101,7 +99,6 @@ describe("B — the English mirror is complete", () => {
       "rv.tile.tests",
       "rv.tile.swarm",
       "common.none_short",
-      "fm.demo",
     ]);
     const identical = (Object.keys(DICTS.nl) as DictKey[]).filter(
       (k) => DICTS.nl[k] === DICTS.en[k] && !sameAllowed.has(k),
@@ -115,11 +112,17 @@ describe("B — the English mirror is complete", () => {
     expect(JSON.stringify(Object.keys(nl).sort())).toBe(JSON.stringify(Object.keys(en).sort()));
     expect(en.eyebrow).not.toBe(nl.eyebrow);
     expect(Object.keys(en.dims).sort()).toEqual(["adopt", "metric", "payer", "queue", "trust", "voice"]);
-    // every event in the engine catalogue has a label in both languages
-    for (const id of ["shutoff", "grant", "econobis", "leak", "success", "waitlist", "dutch", "coachcut"]) {
-      expect(nl.events[id], `nl event ${id}`).toBeTruthy();
-      expect(en.events[id], `en event ${id}`).toBeTruthy();
-      expect(en.events[id]).not.toBe(nl.events[id]);
+    // Every event in the engine catalogue has a label in both languages.
+    //
+    // This list used to be written out by hand, and it was missing `fraud` —
+    // so the English lab showed the Dutch sentence for a fired event on an
+    // English page, and the test that exists to catch exactly that said the
+    // copy was complete. Deriving the ids from EVENTS is the fix: a new event
+    // cannot be added without a translation in both halves.
+    for (const ev of EVENTS) {
+      expect(nl.events[ev.id], `nl event ${ev.id}`).toBeTruthy();
+      expect(en.events[ev.id], `en event ${ev.id}`).toBeTruthy();
+      expect(en.events[ev.id], `en event ${ev.id} is not translated`).not.toBe(nl.events[ev.id]);
     }
   });
 
@@ -278,5 +281,21 @@ describe("B — Dutch stays the primary artefact", () => {
     for (const src of [brief, family]) {
       expect(src).toContain('t("common.artefact_note")');
     }
+
+    // The household page renders the same Dutch fixtures — action text,
+    // evidence, barriers, visit transcripts — and this test used to check only
+    // the brief and the family view. That omission is why the page could ship
+    // with an English header over an unmarked Dutch middle: the toggle said
+    // "EN", the chrome agreed, and nothing told the reader the dossier beneath
+    // it was Dutch on purpose.
+    const household = readFileSync("src/app/household/[id]/page.tsx", "utf8");
+    expect(household, "the household page must mark its Dutch dossier content").toContain('lang="nl"');
+    expect(household, "the household page must explain the Dutch content in English").toContain(
+      't("common.dossier_note")',
+    );
+    // The action list is the largest Dutch surface on that page and lives in
+    // its own component, so it is checked separately.
+    const actionRow = readFileSync("src/components/ActionRow.tsx", "utf8");
+    expect(actionRow, "action text is Dutch and must be marked").toContain('lang="nl"');
   });
 });
