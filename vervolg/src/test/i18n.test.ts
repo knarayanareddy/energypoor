@@ -10,6 +10,7 @@ import {
   t,
   type DictKey,
 } from "../i18n/dict";
+import { ACTION_EN, BARRIER_NOTE_EN, EVIDENCE_EN, mirrorEn } from "../i18n/dossier";
 import { EVENTS } from "../domain/swarm/engine";
 import { fill, swarmCopy } from "../i18n/swarm";
 import { coverageRows } from "../i18n/survey";
@@ -99,6 +100,10 @@ describe("B — the English mirror is complete", () => {
       "rv.tile.tests",
       "rv.tile.swarm",
       "common.none_short",
+      // "label" is the same word in Dutch — an energy label is an energielabel,
+      // and the chip prints "label F". Translating it would be inventing a
+      // difference that the language does not have.
+      "label.field",
     ]);
     const identical = (Object.keys(DICTS.nl) as DictKey[]).filter(
       (k) => DICTS.nl[k] === DICTS.en[k] && !sameAllowed.has(k),
@@ -260,13 +265,16 @@ describe("B — Dutch stays the primary artefact", () => {
     for (const s of ["Vandaag vragen", "Wat is afgesproken", "Om over te dragen", "Niet opgenomen in dit overzicht"]) {
       expect(brief, `brief copy: ${s}`).toContain(s);
     }
-    // §6.1: the household view is B1 Dutch, generated in the domain layer.
+    // §6.1: the household view is B1 Dutch. The words moved from literals in
+    // the page into the dictionary and into FAMILY_COPY when English was added,
+    // so the guarantee is now asserted where the copy actually lives — the
+    // Dutch half must be the real sentence, not an English string.
     const domain = readFileSync("src/domain/brief.ts", "utf8");
     expect(domain, "family copy: an appointment with no date").toContain("nog geen datum");
-    const family = readFileSync("src/app/household/[id]/family/page.tsx", "utf8");
-    for (const s of ["Uw dossier", "Wat is afgesproken", "Uw bezoeken"]) {
-      expect(family, `family copy: ${s}`).toContain(s);
-    }
+    expect(domain, "the household intro must be B1 Dutch").toContain("Dit is uw eigen dossier");
+    expect(DICTS.nl["fm.title"], "§6.1 household view title").toBe("Uw dossier");
+    expect(DICTS.nl["fm.agreed"], "§6.1 household view section").toBe("Wat is afgesproken");
+    expect(DICTS.nl["fm.visits"], "§6.1 household view section").toBe("Uw bezoeken");
   });
 
   it("the pages that render Dutch fixtures mark them as Dutch", () => {
@@ -276,11 +284,14 @@ describe("B — Dutch stays the primary artefact", () => {
     const brief = readFileSync("src/app/household/[id]/brief/page.tsx", "utf8");
     const family = readFileSync("src/app/household/[id]/family/page.tsx", "utf8");
     expect(brief).toContain('lang="nl"');
-    expect(family).toContain('lang="nl"');
-    // and an English reader is told, on screen, why the page is Dutch
-    for (const src of [brief, family]) {
-      expect(src).toContain('t("common.artefact_note")');
-    }
+    // The family view is Dutch on a Dutch page and translated on an English
+    // one, so `lang` is now conditional on the locale rather than a constant.
+    expect(family, "the family view must scope its language explicitly").toContain("lang={locale");
+    // And an English reader is told, on screen, what to expect. The brief is
+    // printed in Dutch by §8.3, so it says so. The family view is translated
+    // now, so it says *that* instead — the two notes must not be the same one.
+    expect(brief, "the brief must say it stays Dutch").toContain('t("common.artefact_note")');
+    expect(family, "the family view must say it is translated").toContain('t("common.family_note")');
 
     // The household page renders the same Dutch fixtures — action text,
     // evidence, barriers, visit transcripts — and this test used to check only
@@ -289,13 +300,63 @@ describe("B — Dutch stays the primary artefact", () => {
     // "EN", the chrome agreed, and nothing told the reader the dossier beneath
     // it was Dutch on purpose.
     const household = readFileSync("src/app/household/[id]/page.tsx", "utf8");
-    expect(household, "the household page must mark its Dutch dossier content").toContain('lang="nl"');
-    expect(household, "the household page must explain the Dutch content in English").toContain(
+    // The household page translates its dossier prose now, so the marker moved
+    // from a blanket `lang="nl"` on the container to per-sentence handling in
+    // DossierText — which still emits lang="nl" for any string with no mirror.
+    expect(household, "dossier prose must go through the translated accessor").toContain("DossierText");
+    expect(household, "the household page must still say what stays untranslated").toContain(
       't("common.dossier_note")',
     );
-    // The action list is the largest Dutch surface on that page and lives in
-    // its own component, so it is checked separately.
+    // The action list used to be the largest Dutch surface on that page and
+    // carried `lang="nl"` because the text was never translated. It has an
+    // English mirror now (src/i18n/dossier.ts), so the honest assertion is the
+    // opposite one: this component must not be hardcoding a Dutch marker that
+    // would now mislabel English text.
     const actionRow = readFileSync("src/components/ActionRow.tsx", "utf8");
-    expect(actionRow, "action text is Dutch and must be marked").toContain('lang="nl"');
+    expect(actionRow, "action text is translated now; it must go through DossierText").toContain("DossierText");
+    expect(actionRow, "a stale lang=nl here would mark English text as Dutch").not.toContain('lang="nl"');
+  });
+});
+
+describe("B — the dossier has an English mirror, keyed by the Dutch sentence", () => {
+  /**
+   * The three case files are generated by running the real extractor, so their
+   * strings are whatever the rules in `src/domain/extract.ts` produced. This
+   * test is the build-time guard that every one of those strings has a mirror:
+   * a new rule that emits a sentence with no translation fails here, instead of
+   * shipping a Dutch line on an English page and being noticed by a reader.
+   *
+   * Names, the programme title and restricted VALUES are exempt — the first two
+   * are proper nouns and the third must not travel to any shared view at all.
+   */
+  it("every action, evidence line, barrier note and transcript has an English mirror", () => {
+    const houses = JSON.parse(readFileSync("data/households.json", "utf8")) as {
+      actions: { what_nl: string; evidence: string | null }[];
+      barriers: { note_nl: string }[];
+      visits: { transcript: string }[];
+    }[];
+    const missing: string[] = [];
+    for (const h of houses) {
+      for (const a of h.actions) {
+        if (!mirrorEn(a.what_nl)) missing.push(`action: ${a.what_nl}`);
+        if (a.evidence && !mirrorEn(a.evidence)) missing.push(`evidence: ${a.evidence}`);
+      }
+      for (const b of h.barriers) if (!mirrorEn(b.note_nl)) missing.push(`barrier: ${b.note_nl}`);
+      for (const v of h.visits) if (!mirrorEn(v.transcript)) missing.push(`transcript: ${v.transcript}`);
+    }
+    expect([...new Set(missing)], "Dutch strings with no English mirror").toEqual([]);
+  });
+
+  it("no mirror is a sentence that failed to change language", () => {
+    // A copy-paste that leaves the Dutch on the English side is the most likely
+    // mistake here, and it is invisible in a diff of two similar sentences.
+    for (const [nl, en] of Object.entries({ ...ACTION_EN, ...EVIDENCE_EN, ...BARRIER_NOTE_EN })) {
+      expect(en, `untranslated mirror for: ${nl}`).not.toBe(nl);
+    }
+  });
+
+  it("an unknown string returns null, never the Dutch dressed as English", () => {
+    expect(mirrorEn("Een zin die nog niet bestaat.")).toBeNull();
+    expect(mirrorEn(null)).toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 import type { Action } from "@/domain/types";
-import { formatDateNl } from "@/domain/brief";
+import { formatDate } from "@/domain/brief";
 import { t as tr, type DictKey, type Locale } from "@/i18n/dict";
+import { DossierText } from "@/components/DutchContent";
 
 const WHO_KEY: Record<Action["who"], DictKey> = {
   huishouden: "hh.who.household",
@@ -57,8 +58,8 @@ export function ActionRow({
           >
             {s.glyph}
           </span>
-          <span style={{ fontSize: 14, fontWeight: 500 }} lang="nl">
-            {action.what_nl}
+          <span style={{ fontSize: 14, fontWeight: 500 }}>
+            <DossierText dutch={action.what_nl} locale={locale} />
           </span>
         </span>
         <span className={`pill ${s.class}`}>{t(s.label)}</span>
@@ -69,24 +70,26 @@ export function ActionRow({
         </span>
         <span>
           {t("hh.action.when")}{" "}
-          <span className="mono">{action.by_when ? formatDateNl(action.by_when) : t("hh.action.no_date")}</span>
+          <span className="mono">{action.by_when ? formatDate(action.by_when, locale) : t("hh.action.no_date")}</span>
         </span>
         <span>
           {t("hh.action.set")}{" "}
-          <span className="mono">{visitDate ? formatDateNl(visitDate) : action.set_at_visit}</span>
+          <span className="mono">{visitDate ? formatDate(visitDate, locale) : action.set_at_visit}</span>
         </span>
         <span className="mono" style={{ fontSize: 10.5, opacity: 0.7 }}>
           {action.action_id}
         </span>
       </div>
       {action.status === "niet_gedaan" && action.evidence && (
-        <div className="small" style={{ marginTop: 6, color: "var(--warm)" }} lang="nl">
-          → &ldquo;{action.evidence}&rdquo;
+        <div className="small" style={{ marginTop: 6, color: "var(--warm)" }}>
+          → &ldquo;
+          <DossierText dutch={action.evidence} locale={locale} />
+          &rdquo;
         </div>
       )}
       {action.status === "gedaan" && action.evidence && (
-        <div className="small muted" style={{ marginTop: 6 }} lang="nl">
-          → {action.evidence}
+        <div className="small muted" style={{ marginTop: 6 }}>
+          → <DossierText dutch={action.evidence} locale={locale} />
         </div>
       )}
     </div>

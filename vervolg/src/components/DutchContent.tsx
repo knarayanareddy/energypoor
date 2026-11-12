@@ -1,30 +1,40 @@
 import type { Locale } from "@/i18n/dict";
+import { mirrorEn } from "@/i18n/dossier";
 
 /**
- * Dutch dossier content on an English screen.
+ * Dossier prose, in the reader's language.
  *
- * The case data is Dutch by schema, not by accident: `what_nl`, `note_nl`,
- * `display_nl` and `composition_nl` are the spec's own field names (§6), and
- * `transcript` is what a coach actually said on a doorstep in Groningen.
- * Translating it would be inventing a different case file.
+ * The case files are Dutch at rest: `what_nl`, `note_nl` and `transcript` are
+ * the spec's own field names (§6). But a page whose chrome is English and whose
+ * middle is Dutch is not "bilingual", it is half-finished — that was the
+ * complaint, and it was fair. So each Dutch sentence has an English mirror in
+ * `src/i18n/dossier.ts`, keyed by the Dutch sentence itself, and this component
+ * is the single place that decides which one to show.
  *
- * So on an English page this content stays Dutch — and must *say* it is Dutch
- * in two ways, because there are two different readers:
+ * The fallback matters as much as the translation. When a string has no mirror
+ * (`mirrorEn` returns null) the Dutch is rendered anyway, wrapped in `lang="nl"`
+ * so assistive technology switches voice, and the page keeps working. It never
+ * silently prints Dutch while claiming to be English.
  *
- *   * `lang="nl"` on the container, so assistive technology switches voice
- *     instead of reading "Isolatie van de voorgevel bellen" with English
- *     phonetics and producing nonsense.
- *   * a visible line, so a sighted reader who switched to English understands
- *     that the switch worked and the dossier beneath it is deliberately Dutch.
- *
- * Both are needed and neither is optional. The household page shipped with
- * neither: the toggle said "EN", the chrome said English, and the middle of the
- * screen was Dutch with nothing to explain it — which reads as a broken
- * translation rather than a design decision.
- *
- * `as` lets the wrapper be a `<div>`, `<span>` or `<p>` so it can sit inside
- * whatever layout it lands in without a stray block element breaking the flow.
+ * What is NOT translated, because it is not prose:
+ *   * household names and the programme title — proper nouns;
+ *   * `restricted` values — §8.2 keeps them out of every shared view entirely;
+ *   * the printed brief — §8.3 requires one A4 page, in Dutch.
  */
+
+/**
+ * One Dutch sentence, rendered in the page's language.
+ *
+ * `dutch` is the stored string; when the locale is English and a mirror exists,
+ * the mirror is returned. Anything unmatched falls through to the Dutch, marked.
+ */
+export function DossierText({ dutch, locale }: { dutch: string; locale: Locale }) {
+  if (locale === "nl") return <>{dutch}</>;
+  const en = mirrorEn(dutch);
+  if (en) return <>{en}</>;
+  return <span lang="nl">{dutch}</span>;
+}
+
 export function DutchContent({
   locale,
   note,

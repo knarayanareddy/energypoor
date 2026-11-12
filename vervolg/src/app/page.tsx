@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Action, CaseRow, Household } from "@/domain/types";
-import { daysBetween, formatDateNl, todayIso } from "@/domain/brief";
+import { daysBetween, formatDate, todayIso } from "@/domain/brief";
 import { CaseTable } from "@/components/CaseTable";
 import { getI18n } from "@/i18n/server";
 import type { DictKey } from "@/i18n/dict";
@@ -211,7 +211,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ l
                     {d.length > 0 && <span className="pill dropped">{t("home.cases.dropped", { n: d.length })}</span>}
                   </div>
                   <div className="small muted" style={{ marginTop: 8 }}>
-                    {t("home.cases.last", { date: formatDateNl(h.last_visit) })}
+                    {t("home.cases.last", { date: formatDate(h.last_visit, locale) })}
                   </div>
                   <div className="row" style={{ gap: 6, marginTop: 10 }}>
                     <Link href={`/household/${h.household_ref}`} className="btn sm">

@@ -2,13 +2,24 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Household } from "@/domain/types";
 import { correctionsFor, findHousehold } from "@/server/store";
-import { buildBrief, formatDateLongNl, formatDateNl, monthsAgoNl, restrictedFieldNames, STALE_DAYS } from "@/domain/brief";
+import { buildBrief, formatDate, formatDateLong, monthsAgo, restrictedFieldNames, STALE_DAYS } from "@/domain/brief";
 import { ActionRow } from "@/components/ActionRow";
 import { RestrictedMarker } from "@/components/RestrictedMarker";
 import { getI18n } from "@/i18n/server";
-import { DutchContent, Nl } from "@/components/DutchContent";
+import type { DictKey } from "@/i18n/dict";
+import { DossierText, Nl } from "@/components/DutchContent";
 
 export const dynamic = "force-dynamic";
+
+const TENURE_KEY = { "huur-corporatie": "tenure.corp", "huur-prive": "tenure.private", koop: "tenure.own" } as const;
+
+/**
+ * A correction names a field, and a field name is interface: `by_when` is a
+ * database column, not Dutch. Known fields get a translation; an unknown one is
+ * shown verbatim rather than hidden, because a correction you cannot read is
+ * worse than one with a technical name.
+ */
+const FIELD_KEYS: Record<string, DictKey> = { by_when: "corr.by_when", target: "corr.field", status: "corr.field" };
 
 
 export default async function HouseholdPage({
@@ -20,6 +31,7 @@ export default async function HouseholdPage({
 }) {
   const { id } = await params;
   const { locale, t } = await getI18n(await searchParams);
+  const fieldLabel = (field: string) => (FIELD_KEYS[field] ? t(FIELD_KEYS[field]) : field);
   const h = findHousehold(id);
   if (!h) notFound();
 
@@ -44,11 +56,13 @@ export default async function HouseholdPage({
               <Nl locale={locale}>{h.display_nl}</Nl>
             </h1>
             <div className="row wrap small muted" style={{ marginTop: 6, gap: 10 }}>
-              <Nl locale={locale}>{h.composition_nl}</Nl>
+              <DossierText dutch={h.composition_nl} locale={locale} />
               <span>·</span>
-              <span>{h.tenure}</span>
+              <span>{t(TENURE_KEY[h.tenure])}</span>
               <span>·</span>
-              <span className="mono">label {h.label}</span>
+              <span className="mono">
+                {t("label.field")} {h.label}
+              </span>
               <span>·</span>
               <span>{h.programme}</span>
             </div>
@@ -73,8 +87,8 @@ export default async function HouseholdPage({
           <div className="note-box" style={{ borderLeftColor: "var(--warm)" }}>
             <strong className="stale">
               {t("hh.stale", {
-                ago: monthsAgoNl(brief.stale_days),
-                date: formatDateNl(h.last_visit),
+                ago: monthsAgo(brief.stale_days, locale),
+                date: formatDate(h.last_visit, locale),
               })}
             </strong>{" "}
             <span className="muted small">
@@ -150,10 +164,10 @@ export default async function HouseholdPage({
                   <div key={b.barrier_id} className="row between" style={{ gap: 8, alignItems: "flex-start" }}>
                     <span style={{ minWidth: 0 }}>
                       <span className="pill mono" style={{ marginRight: 6 }}>
-                        {b.kind}
+                        {t(`barrier.${b.kind}` as DictKey)}
                       </span>
-                      <span className={b.restricted ? "muted" : ""} style={{ fontSize: 13 }} lang="nl">
-                        {b.note_nl}
+                      <span className={b.restricted ? "muted" : ""} style={{ fontSize: 13 }}>
+                        <DossierText dutch={b.note_nl} locale={locale} />
                       </span>
                     </span>
                     {b.restricted && <RestrictedMarker locale={locale} />}
@@ -172,11 +186,14 @@ export default async function HouseholdPage({
                 {corrections.map((c) => (
                   <div key={c.correction_id}>
                     <div className="mono" style={{ fontSize: 11 }}>
-                      {c.correction_id} · {c.by} · {formatDateNl(c.at)}
+                      {c.correction_id} · {t(c.by === "coach" ? "hh.who.coach" : "hh.who.household")} ·{" "}
+                      {formatDate(c.at, locale)}
                     </div>
                     <div>
-                      {c.target} <span className="mono">{c.target_id}</span> → <strong>{c.field}</strong>:{" "}
-                      <span className="muted" lang="nl">{c.from ?? "—"}</span> → <span lang="nl">{c.to ?? "—"}</span>
+                      {t(`corr.${c.target}` as DictKey)} <span className="mono">{c.target_id}</span> →{" "}
+                      <strong>{fieldLabel(c.field)}</strong>:{" "}
+                      <span className="muted">{c.from ? formatDate(c.from, locale) : "—"}</span> →{" "}
+                      <span>{c.to ? formatDate(c.to, locale) : "—"}</span>
                     </div>
                   </div>
                 ))}
@@ -196,7 +213,7 @@ export default async function HouseholdPage({
                 <li key={v.visit_id} className={i === 0 ? "now" : ""}>
                   <div className="row between wrap" style={{ gap: 8 }}>
                     <span className="date">
-                      {formatDateLongNl(v.date)} · {v.coach_ref} · <span className="mono">{v.visit_id}</span>
+                      {formatDateLong(v.date, locale)} · {v.coach_ref} · <span className="mono">{v.visit_id}</span>
                     </span>
                     <span className="row" style={{ gap: 6 }}>
                       <span className="pill mono">{t("hh.visit.actions", { n: v.actions_added.length })}</span>
@@ -207,8 +224,8 @@ export default async function HouseholdPage({
                       )}
                     </span>
                   </div>
-                  <p style={{ marginTop: 6, fontSize: 13.5 }} lang="nl">
-                    {v.transcript}
+                  <p style={{ marginTop: 6, fontSize: 13.5 }}>
+                    <DossierText dutch={v.transcript} locale={locale} />
                   </p>
                   {v.corrections.length > 0 && (
                     <div className="small" style={{ marginTop: 6, color: "var(--warm)" }}>

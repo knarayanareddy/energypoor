@@ -4,6 +4,7 @@ import { correctionsFor, findHousehold } from "@/server/store";
 import { buildFamilyView, formatDateLongNl } from "@/domain/brief";
 import { FamilyCorrections } from "@/components/FamilyCorrections";
 import { getI18n } from "@/i18n/server";
+import { DossierText } from "@/components/DutchContent";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ export default async function FamilyPage({
   const view = buildFamilyView(
     h,
     corrections.map((c) => ({ at: c.at, field: c.field, to: c.to ?? "" })),
+    locale,
   );
   const shared = h.actions.filter((a) => !a.restricted);
 
@@ -48,33 +50,39 @@ export default async function FamilyPage({
 
       {locale === "en" && (
         <p className="no-print small muted" data-testid="artefact-note" style={{ marginBottom: 12 }}>
-          {t("common.artefact_note")}
+          {t("common.family_note")}
         </p>
       )}
 
-      <div className="familyview" lang="nl">
-        <h1>Uw dossier</h1>
+      {/* The household's own page keeps its Dutch paper look (§6.1 B1). The
+          words follow the reader's language; RTL-free, no ids, no internal
+          notes. `lang` is set on the block only in Dutch, because the content
+          inside is translated when English is active. */}
+      <div className="familyview" lang={locale === "nl" ? "nl" : undefined}>
+        <h1>{t("fm.title")}</h1>
         <p className="intro">{view.intro_nl}</p>
 
         <h2 style={{ fontSize: 15, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 4 }}>
-          Wat is afgesproken
+          {t("fm.agreed")}
         </h2>
         {shared.map((a, i) => (
           <div className="appt" key={a.action_id}>
-            <div className="what">{a.what_nl}</div>
+            <div className="what">
+              <DossierText dutch={a.what_nl} locale={locale} />
+            </div>
             <div className="meta">
-              {view.appointments[i]?.when_nl ?? "nog geen datum"}
+              {view.appointments[i]?.when_nl ?? t("fm.nodate")}
             </div>
             <span className={`state ${a.status}`}>
               {a.status === "gedaan"
-                ? "Dit is gedaan"
+                ? t("fm.done")
                 : a.status === "niet_gedaan"
-                  ? "Dit is niet gedaan"
-                  : "Dit loopt nog"}
+                  ? t("fm.notdone")
+                  : t("fm.ongoing")}
             </span>
           </div>
         ))}
-        {shared.length === 0 && <p className="meta">Er staan nog geen afspraken in uw dossier.</p>}
+        {shared.length === 0 && <p className="meta">{t("fm.empty")}</p>}
 
         {view.barriers_nl.length > 0 && (
           <>
@@ -87,11 +95,13 @@ export default async function FamilyPage({
                 margin: "26px 0 4px",
               }}
             >
-              Wat de coach heeft opgeschreven
+              {t("fm.noted")}
             </h2>
             <ul style={{ margin: 0, paddingLeft: 18, fontSize: 16.5 }}>
               {view.barriers_nl.map((b, i) => (
-                <li key={i}>{b}</li>
+                <li key={i}>
+                  <DossierText dutch={b} locale={locale} />
+                </li>
               ))}
             </ul>
           </>
@@ -106,7 +116,7 @@ export default async function FamilyPage({
             margin: "26px 0 4px",
           }}
         >
-          Uw bezoeken
+          {t("fm.visits")}
         </h2>
         {view.visits_nl.map((v, i) => (
           <div className="appt" key={i}>

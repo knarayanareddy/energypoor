@@ -357,6 +357,53 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
     expect(bad).toEqual([]);
   }, 180000);
 
+  /**
+   * The complaint that started this: an English page whose middle was Dutch.
+   *
+   * `B` above checks that each screen *loads* in the chosen language and that
+   * the chrome follows. It could not catch this, because the Dutch it looked for
+   * was in the dossier, not the chrome: the header said "Pre-visit preparation",
+   * the nav said "Caseload", and the ten actions underneath said
+   * "Isolatie van de voorgevel bellen". Every one of those checks passed.
+   *
+   * So this walks the visible text of the household pages in English and fails
+   * on Dutch function words. It is deliberately a *small* list of words that
+   * cannot appear inside an English sentence — `de`, `het`, `van`, `niet` — and
+   * not a vocabulary test, because a proper noun ("Familie Yılmaz", "Gemeente
+   * Groningen") or a field name (`by_when`) is meant to stay.
+   */
+  it("B4 — an English household page has no Dutch sentences left in it", async () => {
+    if (!available) return;
+    const bad: string[] = [];
+    const DUTCH_ONLY = /\b(de|het|een|van|niet|geen|wordt|worden|zijn|met|voor|aan|bij|ook|maar|nog|wel|dit|deze|dat|die|zij|hij|wij|onze|kan|kunnen|moet|moeten|heeft|hebben|gedaan|afgesproken|onbekend|huishouden|bezoek|formulier|isolatie|energietoeslag|kwijtschelding|toeslag|aanvraag|ketel|monteur|voordeur|vochtplek|huurtoeslag|corporatie)\b/;
+    for (const route of ["/household/HH-014", "/household/HH-027", "/household/HH-041", "/household/HH-014/family"]) {
+      const page = await browser.newPage();
+      await setLocale(page, "en");
+      await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
+      const hits = (await page.evaluate(`(() => {
+        // innerText of <main> only: the RSC payload in a <script> carries both
+        // dictionaries and would match every word.
+        const main = document.querySelector("main");
+        if (!main) return [];
+        const out = [];
+        for (const el of main.querySelectorAll("*")) {
+          // A Dutch proper noun or field name is allowed to stay; anything the
+          // author marked lang="nl" is an acknowledged fallback, not a leak.
+          if (el.closest('[lang="nl"]')) continue;
+          if (el.children.length) continue;
+          const t = (el.textContent || "").trim();
+          if (t) out.push(t);
+        }
+        return out;
+      })()`)) as string[];
+      for (const line of hits) {
+        if (DUTCH_ONLY.test(line)) bad.push(`${route}: "${line.slice(0, 90)}"`);
+      }
+      await page.close();
+    }
+    expect(bad, "Dutch left on an English household page").toEqual([]);
+  }, 180000);
+
   it("B2 — the toggle works inside a cross-site frame, where cookies are blocked", async () => {
     if (!available) return;
     const { createServer } = await import("node:http");

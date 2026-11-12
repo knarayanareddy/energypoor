@@ -24,7 +24,7 @@ npm run dev                             # http://localhost:3000
 ```
 
 ```bash
-npm test                                # 107 tests in 7 files; expect all green
+npm test                                # 110 tests in 7 files; expect all green
 npx tsc --noEmit                        # strict, clean
 npm run build                           # prebuild regenerates fixtures, personas and the 200-run ensemble
 npx tsx scripts/verify-chain.ts         # total=9 verified=9 brokenAt=null
@@ -34,7 +34,7 @@ Acceptance criteria that need a browser are measured, not inferred. With `npm ru
 running:
 
 ```bash
-npm run test:browser                    # 13 real-browser checks in both languages, ~4.5 min
+npm run test:browser                    # 14 real-browser checks in both languages, ~4 min
 ```
 
 It drives a real Chromium (`@sparticuz/chromium` vendors the binary inside its npm tarball; the
@@ -54,7 +54,7 @@ body — and that the next link click keeps the choice.
 See `REVIEW.md` §6.1 for the three real defects this found and the two ways my own harness lied
 first.
 
-Current state, verified in this checkout: `tsc` clean, **107/107 tests** plus **13/13 browser
+Current state, verified in this checkout: `tsc` clean, **110/110 tests** plus **14/14 browser
 checks**, `next build` exit 0 over 9 screens and 12 API routes, chain `9/9`, and the committed
 ensemble breaking **F3 and F5**.
 
@@ -74,24 +74,28 @@ cookie (`vervolg-locale`) is a best-effort optimisation for plain link navigatio
 `?lang=` → middleware header → cookie → `nl`. `REVIEW.md` D-15 has the diagnosis, and browser check
 `B2` now pins it by opening the app inside a cross-site frame.
 
-What is translated is the **interface**: navigation, headings, labels, empty states, error
-sentences, the review, the lab's ten panels. The Dutch half of that interface is genuinely Dutch —
-`Dossiers`, `Zwermlab`, `Opvolgdekking` — because a borrowed English word is not a translation.
+What is translated is the **interface** — navigation, headings, labels, empty states, error
+sentences, the review, the lab's ten panels — **and the dossier prose**. The Dutch half is genuinely
+Dutch (`Dossiers`, `Zwermlab`, `Opvolgdekking`), because a borrowed English word is not a
+translation. Dates, tenure, barrier kinds and correction field names follow the language too.
 
-What is **not** translated is the dossier content, and that is a design decision, not an omission.
-On an English screen it is marked `lang="nl"` and carries a line saying why it is Dutch:
+**The dossier prose is translated too.** Every sentence the extractor produces — action text,
+evidence, barrier notes, visit transcripts, household composition — has an English mirror in
+`src/i18n/dossier.ts`, keyed by the Dutch sentence itself so a changed extractor rule cannot silently
+revert a screen to Dutch. What remains untranslated is only what is not prose:
 
-| Stays Dutch | Why |
+| Stays as-is | Why |
 |---|---|
+| Household names, the programme title | Proper nouns: `Familie Yılmaz`, `Gemeente Groningen — energiearmoede 2026`. |
+| Field names (`by_when`, `what_nl`) | Database columns and the spec's own schema (§6). |
 | The pre-visit brief (§8.3) | The spec says one A4 page, in Dutch. It is read aloud on a doorstep. |
-| The household view (§6.1) | It is written in B1 Dutch *for the household*. Translating it would be a different artefact. |
-| The extractor's rules (§7.2) | A rule engine over Dutch text. `kwijtschelding`, `verblijfsvergunning` and `schuld` are the lexicon. |
-| The 15 notes and 3 households | These are the fixtures the whole argument rests on. |
+| The value inside a capture field | It is written to the case file; the English reading appears above the editor. |
 | The 14 v2 instrument items (§12) | The population answered *these*; a translation would be a different measurement. |
+| The swarm fixtures (§11) | The text the spec was written about; the lab says so on screen. |
 
-On an English screen those three pages carry a visible line saying so, and each is marked
-`lang="nl"` so a screen reader switches voice instead of reading Dutch with English phonetics.
-The v1 questionnaire *is* translated, because it is a strawman we wrote to argue against.
+Anything with no mirror falls back to the Dutch, marked `lang="nl"`, so a missing translation is
+always *visible* and never silent. The v1 questionnaire *is* translated, because it is a strawman we
+wrote to argue against.
 
 The guarantee is enforced, not asserted: the dictionary's English half is typed as
 `Record<DictKey, string>`, so a missing key fails `tsc`; `src/test/i18n.test.ts` checks that no

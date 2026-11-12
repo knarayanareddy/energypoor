@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { t as tr, type DictKey, type Locale } from "@/i18n/dict";
+import { DossierText } from "@/components/DutchContent";
 
 /**
  * W11 — the household can see and correct its own file. "dit klopt niet"
@@ -82,7 +83,14 @@ export function FamilyCorrections({
         {actions.map((a) => (
           <div key={a.id} style={{ borderTop: "1px solid #eee6d8", paddingTop: 8 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
-              <span style={{ fontSize: 16 }}>{a.what}</span>
+              {/* The label is translated; `a.what` itself is not, because
+                  `setValue(a.what)` below seeds the editor that writes the
+                  correction back to the case file. Showing English in the
+                  label and saving Dutch in the value is the only combination
+                  that does not corrupt the dossier. */}
+              <span style={{ fontSize: 16 }}>
+                <DossierText dutch={a.what} locale={locale} />
+              </span>
               <button
                 type="button"
                 className="fix"

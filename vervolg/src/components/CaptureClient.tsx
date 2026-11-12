@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Draft, DraftAction, DraftBarrier } from "@/domain/types";
 import { t as tr, type DictKey, type Locale } from "@/i18n/dict";
+import { DossierText } from "@/components/DutchContent";
 
 interface NoteFixture {
   id: string;
@@ -22,6 +23,15 @@ const HOUSEHOLDS = [
 
 /** Fixture kinds, translated as UI labels. The notes themselves stay Dutch. */
 const KIND: Record<string, { nl: string; en: string }> = {
+  // barrier kinds (§6) — the value is stored as `kosten`, `taal`, ...
+  kosten: { nl: "kosten", en: "cost" },
+  taal: { nl: "taal", en: "language" },
+  wantrouwen: { nl: "wantrouwen", en: "distrust" },
+  gezondheid: { nl: "gezondheid", en: "health" },
+  administratie: { nl: "administratie", en: "paperwork" },
+  woning: { nl: "woning", en: "housing" },
+  anders: { nl: "anders", en: "other" },
+  // note fixture kinds
   clean: { nl: "schone notitie", en: "clean note" },
   vague: { nl: "vaag", en: "vague" },
   adversarial: { nl: "adversarieel — privacy", en: "adversarial — privacy" },
@@ -410,6 +420,20 @@ export function CaptureClient({ notes, locale }: { notes: NoteFixture[]; locale:
                     </button>
                   </div>
                 </div>
+                {/* THE VALUE STAYS DUTCH. This input is an editor over
+                    `what_nl`, and whatever is in it is written to the case file
+                    on save — an English sentence typed here (or, worse, shown
+                    here and then saved unedited) would put English into a Dutch
+                    dossier, which is a data change, not a translation. So the
+                    field is marked `lang="nl"` and holds the stored Dutch text;
+                    what the English reader gets instead is the mirror *above*
+                    the input, so they can read what it says without the editor
+                    rewriting their file. */}
+                {locale === "en" && (
+                  <p className="small muted" style={{ marginTop: 4 }}>
+                    <DossierText dutch={a.what_nl} locale={locale} />
+                  </p>
+                )}
                 <input
                   className="field"
                   lang="nl"
@@ -433,11 +457,11 @@ export function CaptureClient({ notes, locale }: { notes: NoteFixture[]; locale:
                 <div className="stack tight" style={{ marginTop: 6 }}>
                   {draft.barriers.map((b: DraftBarrier) => (
                     <div key={b.barrier_id} className="row between" style={{ gap: 8 }}>
-                      <span style={{ fontSize: 13 }} lang="nl">
+                      <span style={{ fontSize: 13 }}>
                         <span className="pill mono" style={{ marginRight: 6 }}>
-                          {b.kind}
+                          {kindLabel(b.kind)}
                         </span>
-                        {b.note_nl}
+                        <DossierText dutch={b.note_nl} locale={locale} />
                       </span>
                       {b.restricted ? <span className="pill restricted">{t("cap.restricted")}</span> : null}
                     </div>

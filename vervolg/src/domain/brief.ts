@@ -1,6 +1,7 @@
 // src/domain/brief.ts — §8.3
 // Timeline → one page. Deterministic template: zero model calls.
 import type { Action, Barrier, Household, PreVisitBrief, Visit } from "./types";
+import { mirrorEn } from "../i18n/dossier";
 
 const MS_DAY = 86400000;
 
@@ -14,42 +15,67 @@ export function todayIso(now = new Date()): string {
   return now.toISOString().slice(0, 10);
 }
 
-const MONTHS_SHORT = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+/**
+ * Dates, in both languages.
+ *
+ * A date is interface, not dossier content: "31 mrt 2025" next to an English
+ * sentence is a mixed-language screen, and the Dutch abbreviation is not a
+ * proper noun. So the month names are translated and the `Nl` names survive as
+ * the Dutch case of the same two functions — the domain layer's defaults,
+ * because a brief printed for a doorstep is printed in Dutch.
+ *
+ * `5 jun 2025` vs `5 Jun 2025`: the English forms are capitalised, the Dutch
+ * ones are not. That is each language's own convention, not a typo.
+ */
+const MONTHS = {
+  nl: {
+    short: ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"],
+    long: [
+      "januari", "februari", "maart", "april", "mei", "juni",
+      "juli", "augustus", "september", "oktober", "november", "december",
+    ],
+  },
+  en: {
+    short: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    long: [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December",
+    ],
+  },
+} as const;
 
-export function formatDateNl(iso: string | null): string {
-  if (!iso) return "geen datum";
+export type DateLocale = keyof typeof MONTHS;
+
+function joinDate(iso: string, month: string): string {
   const d = iso.slice(0, 10);
-  const day = Number(d.slice(8, 10));
-  const month = MONTHS_SHORT[Number(d.slice(5, 7)) - 1];
-  return `${day} ${month} ${d.slice(0, 4)}`;
+  return `${Number(d.slice(8, 10))} ${month} ${d.slice(0, 4)}`;
 }
 
-export function formatDateLongNl(iso: string | null): string {
-  if (!iso) return "geen datum";
-  const d = iso.slice(0, 10);
-  const day = Number(d.slice(8, 10));
-  const month = [
-    "januari",
-    "februari",
-    "maart",
-    "april",
-    "mei",
-    "juni",
-    "juli",
-    "augustus",
-    "september",
-    "oktober",
-    "november",
-    "december",
-  ][Number(d.slice(5, 7)) - 1];
-  return `${day} ${month} ${d.slice(0, 4)}`;
+export function formatDate(iso: string | null, locale: DateLocale = "nl"): string {
+  if (!iso) return locale === "nl" ? "geen datum" : "no date";
+  return joinDate(iso, MONTHS[locale].short[Number(iso.slice(5, 7)) - 1]);
 }
 
-export function monthsAgoNl(days: number): string {
+export function formatDateLong(iso: string | null, locale: DateLocale = "nl"): string {
+  if (!iso) return locale === "nl" ? "geen datum" : "no date";
+  return joinDate(iso, MONTHS[locale].long[Number(iso.slice(5, 7)) - 1]);
+}
+
+export function monthsAgo(days: number, locale: DateLocale = "nl"): string {
   const months = Math.round(days / 30.44);
-  if (months < 1) return `${days} dagen`;
+  if (locale === "en") {
+    if (months < 1) return `${days} ${days === 1 ? "day" : "days"}`;
+    return `${months} ${months === 1 ? "month" : "months"}`;
+  }
+  if (months < 1) return `${days} ${days === 1 ? "dag" : "dagen"}`;
   return `${months} ${months === 1 ? "maand" : "maanden"}`;
 }
+
+// The Dutch spellings stay, because §8.3's brief and the visit copy are Dutch
+// by requirement and call these by name.
+export const formatDateNl = (iso: string | null) => formatDate(iso, "nl");
+export const formatDateLongNl = (iso: string | null) => formatDateLong(iso, "nl");
+export const monthsAgoNl = (days: number) => monthsAgo(days, "nl");
 
 export const STALE_DAYS = 270;
 
@@ -227,6 +253,44 @@ const STATE_NL: Record<string, string> = {
   onbekend: "We weten het nog niet",
 };
 
+const STATE_EN: Record<string, string> = {
+  afgesproken: "Agreed",
+  gedaan: "Done",
+  niet_gedaan: "Not done",
+  onbekend: "We do not know yet",
+};
+
+/**
+ * §6.1 — the household's own view, in B1 Dutch.
+ *
+ * Dutch is the artefact: this page exists to be read on paper by the person the
+ * file is about, in Groningen. The English strings are a mirror for a reviewer
+ * reading the UI in English, never a replacement — and the printed brief
+ * (`buildBrief`) has no English path at all, because §8.3 mandates one A4 page,
+ * in Dutch.
+ *
+ * Both are built here so the two can never disagree about what was agreed; the
+ * wording differs, the data does not.
+ */
+const FAMILY_COPY = {
+  nl: {
+    intro:
+      "Dit is uw eigen dossier. U ziet precies wat de energiecoach heeft opgeschreven. Klopt er iets niet, dan kunt u het hieronder corrigeren.",
+    noDate: "nog geen datum",
+    none: "Er staan nog geen afspraken in uw dossier.",
+    nothingAgreed: "Geen afspraken vastgelegd.",
+    footer: "Dit dossier wordt nooit met de corporatie of de energieleverancier gedeeld.",
+  },
+  en: {
+    intro:
+      "This is your own file. You see exactly what the energy coach wrote down. If something is not right, you can correct it below.",
+    noDate: "no date yet",
+    none: "There are no appointments in your file yet.",
+    nothingAgreed: "No appointments recorded.",
+    footer: "This file is never shared with the housing corporation or the energy supplier.",
+  },
+} as const;
+
 /**
  * The date a completed or dropped action is reported at. Shared with the brief
  * so the coach's A4 and the household's own view can never disagree about when
@@ -240,16 +304,21 @@ function stampVisitDate(household: Household, a: Action): Action {
   return a;
 }
 
-export function buildFamilyView(household: Household, corrections: { at: string; field: string; to: string }[] = []): FamilyView {
+export function buildFamilyView(
+  household: Household,
+  corrections: { at: string; field: string; to: string }[] = [],
+  locale: DateLocale = "nl",
+): FamilyView {
   const shared = household.actions.filter((a) => !a.restricted).map((a) => stampVisitDate(household, a));
+  const copy = FAMILY_COPY[locale];
+  const stateOf = (s: string) => (locale === "en" ? STATE_EN : STATE_NL)[s] ?? s;
   return {
     display_nl: household.display_nl,
-    intro_nl:
-      "Dit is uw eigen dossier. U ziet precies wat de energiecoach heeft opgeschreven. Klopt er iets niet, dan kunt u het hieronder corrigeren.",
+    intro_nl: copy.intro,
     appointments: shared.map((a) => ({
       what_nl: a.what_nl,
-      when_nl: a.by_when ? formatDateLongNl(a.by_when) : "nog geen datum",
-      state_nl: STATE_NL[a.status] ?? a.status,
+      when_nl: a.by_when ? formatDateLong(a.by_when, locale) : copy.noDate,
+      state_nl: stateOf(a.status),
       state: a.status,
     })),
     barriers_nl: household.barriers.filter((b) => !b.restricted).map((b) => b.note_nl),
@@ -260,15 +329,15 @@ export function buildFamilyView(household: Household, corrections: { at: string;
       const added = v.actions_added
         .map((id) => household.actions.find((a) => a.action_id === id))
         .filter((a): a is NonNullable<typeof a> => !!a && !a.restricted)
-        .map((a) => a.what_nl);
+        .map((a) => (locale === "en" ? (mirrorEn(a.what_nl) ?? a.what_nl) : a.what_nl));
       return {
-        date_nl: formatDateLongNl(v.date),
+        date_nl: formatDateLong(v.date, locale),
         count: added.length,
-        preview_nl: added.length ? added.join(" · ") : "Geen afspraken vastgelegd.",
+        preview_nl: added.length ? added.join(" · ") : copy.nothingAgreed,
       };
     }),
     corrections_nl: corrections,
-    footer_nl: "Dit dossier wordt nooit met de corporatie of de energieleverancier gedeeld.",
+    footer_nl: copy.footer,
   };
 }
 
