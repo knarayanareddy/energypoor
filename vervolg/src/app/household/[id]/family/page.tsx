@@ -42,14 +42,14 @@ export default async function FamilyPage({ params }: { params: Promise<{ id: str
         <h1>Uw dossier</h1>
         <p className="intro">{view.intro_nl}</p>
 
-        <h2 style={{ fontSize: 15, letterSpacing: "0.06em", textTransform: "uppercase", color: "#6d6659", marginBottom: 4 }}>
+        <h2 style={{ fontSize: 15, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 4 }}>
           Wat is afgesproken
         </h2>
         {shared.map((a, i) => (
           <div className="appt" key={a.action_id}>
             <div className="what">{a.what_nl}</div>
             <div className="meta">
-              {view.appointments[i]?.when_nl ?? (a.by_when ? formatDateLongNl(a.by_when) : "nog geen datum")}
+              {view.appointments[i]?.when_nl ?? "nog geen datum"}
             </div>
             <span className={`state ${a.status}`}>
               {a.status === "gedaan"
@@ -69,7 +69,7 @@ export default async function FamilyPage({ params }: { params: Promise<{ id: str
                 fontSize: 15,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
-                color: "#6d6659",
+                color: "var(--muted)",
                 margin: "26px 0 4px",
               }}
             >
@@ -88,7 +88,7 @@ export default async function FamilyPage({ params }: { params: Promise<{ id: str
             fontSize: 15,
             letterSpacing: "0.06em",
             textTransform: "uppercase",
-            color: "#6d6659",
+            color: "var(--muted)",
             margin: "26px 0 4px",
           }}
         >
@@ -107,7 +107,7 @@ export default async function FamilyPage({ params }: { params: Promise<{ id: str
           <FamilyCorrections displayNl={h.display_nl} actions={shared.map((a) => ({ id: a.action_id, what: a.what_nl }))} />
         </div>
 
-        <p style={{ marginTop: 24, fontSize: 14.5, color: "#6d6659" }}>{view.footer_nl}</p>
+        <p style={{ marginTop: 24, fontSize: 14.5, color: "var(--muted)" }}>{view.footer_nl}</p>
         <p style={{ marginTop: 8, fontSize: 12, color: "var(--muted)" }}>
           Demo — synthetic households. No real person&apos;s data is in this build.
         </p>

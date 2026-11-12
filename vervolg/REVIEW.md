@@ -347,6 +347,19 @@ Three real defects were found this way and fixed, which is the argument for meas
   `var(--muted)` (5.14:1 worst case).
 - **The brief's excluded-fields line printed in `#7c3aed`** at 10.5 px, which reads as a
   hyperlink on paper and survives a mono laser printer badly. Forced to black in `@media print`.
+- **The household view showed "nog geen datum" on actions that were already done.** The brief
+  had been fixed to report an action at the visit where its status was observed; `buildFamilyView`
+  had its own copy of the old logic, so the coach's A4 said "gedaan 17 jun 2025" while the
+  household's own file said "nog geen datum" about the same action. The two now share one
+  `stampVisitDate` helper, which is the only way they can be guaranteed not to drift again.
+- **The Next.js dev badge covered the synthetic-data disclaimer.** It is a `<nextjs-portal>`
+  shadow host pinned bottom-left; `devIndicators: false` does not remove it in Next 16, and it
+  sits outside the React tree so it cannot be fixed in JSX. A CSS rule hides it, and a browser
+  test asserts that the element at that point is not the portal. A demo whose whole premise is
+  "synthetic households" must not have that line obscured by a dev affordance.
+- **`/survey` cut questionnaire items mid-word** with `slice(0, 60)`, producing rows ending in
+  "…de vorige afspraak h". In a table of verbatim items that reads as a typo. Now clamped at a
+  word boundary with the full text in `title`.
 
 Two measurement mistakes worth recording, because both produced *plausible* output:
 

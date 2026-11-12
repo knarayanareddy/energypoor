@@ -29,6 +29,19 @@ const COVERAGE: { need: string; why: string; v1: string; v2: string }[] = [
   { need: "N10 · Wat zou ze laten stoppen?", why: "churn, voordat het gebeurt", v1: "✗", v2: "✓ q_stop" },
 ];
 
+/**
+ * Truncate at a word boundary. `slice(0, 60)` cut items mid-word
+ * ("Hoe belangrijk is het dat de coach zich de vorige afspraak h"), which looks
+ * like a typo in a table of verbatim questionnaire items. The full text stays
+ * available in the title attribute.
+ */
+function clamp60(text: string, max = 60): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const space = cut.lastIndexOf(" ");
+  return (space > max * 0.6 ? cut.slice(0, space) : cut).trimEnd() + "…";
+}
+
 export default function SurveyPage() {
   const personas = buildPersonas(240, 20261111);
   const run = runSwarm(personas, { seed: 20261111 });
@@ -159,7 +172,8 @@ export default function SurveyPage() {
                 {ITEMS.map((it) => (
                   <tr key={it.id}>
                     <td>
-                      <span className="mono small muted">{it.no}</span> {it.text_nl.slice(0, 60)}
+                      <span className="mono small muted">{it.no}</span>{" "}
+                      <span title={it.text_nl}>{clamp60(it.text_nl)}</span>
                     </td>
                     {sample.map((s) => {
                       const a = s.answers.find((x) => x.item === it.id);

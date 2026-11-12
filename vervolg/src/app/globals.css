@@ -1277,6 +1277,18 @@ input[type="range"] {
   }
 }
 
+/*
+ * The Next.js dev-tools badge is a <nextjs-portal> custom element that renders
+ * into a shadow root at bottom-left — exactly where the synthetic-data
+ * disclaimer lives, so in development it covers the one line that must always
+ * be readable. `devIndicators: false` in next.config.ts does not remove it in
+ * Next 16, and it cannot be hidden from JSX (it is outside the React tree).
+ * It is dev-only, so hiding it costs nothing in a production build.
+ */
+nextjs-portal {
+  display: none !important;
+}
+
 /* ---------- overflow guards (A2) ---------- */
 /* Every flex/grid child must be allowed to shrink below its content width,
    otherwise a long Dutch compound word widens the document at 390 px. */

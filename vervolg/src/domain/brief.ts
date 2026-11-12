@@ -169,16 +169,8 @@ export function buildBrief(household: Household, today = todayIso()): PreVisitBr
 
   // A completed or dropped action is reported at the visit where that status
   // was observed, because that is the fact the coach needs on the doorstep —
-  // not the date the action was first agreed.
-  const stamp = <T extends Action>(a: T): T => {
-    if (a.status === "gedaan" || a.status === "niet_gedaan") {
-      const d = visitDate(a.status_at_visit);
-      if (d) return { ...a, by_when: d };
-    }
-    return a;
-  };
-
-  const shared = household.actions.filter((a) => !a.restricted).map(stamp);
+  // not the date the action was first agreed. Same helper as the family view.
+  const shared = household.actions.filter((a) => !a.restricted).map((a) => stampVisitDate(household, a));
   const agreed = shared.filter((a) => a.status === "afgesproken");
   const unknown = shared.filter((a) => a.status === "onbekend");
   const completed = shared.filter((a) => a.status === "gedaan");
@@ -221,7 +213,7 @@ export function buildBrief(household: Household, today = todayIso()): PreVisitBr
 export interface FamilyView {
   display_nl: string;
   intro_nl: string;
-  appointments: { what_nl: string; when_nl: string; state_nl: string }[];
+  appointments: { what_nl: string; when_nl: string; state_nl: string; state: string }[];
   barriers_nl: string[];
   visits_nl: { date_nl: string; count: number; preview_nl: string }[];
   corrections_nl: { at: string; field: string; to: string }[];
@@ -235,8 +227,21 @@ const STATE_NL: Record<string, string> = {
   onbekend: "We weten het nog niet",
 };
 
+/**
+ * The date a completed or dropped action is reported at. Shared with the brief
+ * so the coach's A4 and the household's own view can never disagree about when
+ * something happened.
+ */
+function stampVisitDate(household: Household, a: Action): Action {
+  if (a.status === "gedaan" || a.status === "niet_gedaan") {
+    const d = household.visits.find((v) => v.visit_id === a.status_at_visit)?.date;
+    if (d) return { ...a, by_when: d };
+  }
+  return a;
+}
+
 export function buildFamilyView(household: Household, corrections: { at: string; field: string; to: string }[] = []): FamilyView {
-  const shared = household.actions.filter((a) => !a.restricted);
+  const shared = household.actions.filter((a) => !a.restricted).map((a) => stampVisitDate(household, a));
   return {
     display_nl: household.display_nl,
     intro_nl:
@@ -245,6 +250,7 @@ export function buildFamilyView(household: Household, corrections: { at: string;
       what_nl: a.what_nl,
       when_nl: a.by_when ? formatDateLongNl(a.by_when) : "nog geen datum",
       state_nl: STATE_NL[a.status] ?? a.status,
+      state: a.status,
     })),
     barriers_nl: household.barriers.filter((b) => !b.restricted).map((b) => b.note_nl),
     // A transcript is a coach's raw dictation and may contain restricted

@@ -187,6 +187,26 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
     expect(bad).toEqual([]);
   }, 180000);
 
+  it("the dev-tools badge does not cover the synthetic-data disclaimer", async () => {
+    if (!available) return;
+    // The badge is a <nextjs-portal> shadow host at bottom-left. Whatever sits
+    // there must not be a dev overlay: the disclaimer is the one line on every
+    // screen that may never be obscured.
+    const covered: string[] = [];
+    for (const route of ["/", "/capture", "/family-placeholder"]) {
+      if (route === "/family-placeholder") continue;
+      const page = await browser.newPage();
+      await page.setViewport({ width: 400, height: 400 });
+      await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
+      const tag = (await page.evaluate(
+        "(() => { const e = document.elementFromPoint(42, 362); return e ? e.tagName.toLowerCase() : 'none'; })()",
+      )) as string;
+      if (tag === "nextjs-portal") covered.push(route);
+      await page.close();
+    }
+    expect(covered).toEqual([]);
+  }, 60000);
+
   it("A12 — first contentful paint is under 1500 ms with a cold cache", async () => {
     if (!available) return;
     const slow: string[] = [];
