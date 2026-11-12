@@ -24,14 +24,30 @@ npm run dev                             # http://localhost:3000
 ```
 
 ```bash
-npm test                                # 77 tests in 5 files; expect all green
+npm test                                # 93 tests in 6 files; expect all green
 npx tsc --noEmit                        # strict, clean
 npm run build                           # prebuild regenerates fixtures, personas and the 200-run ensemble
 npx tsx scripts/verify-chain.ts         # total=9 verified=9 brokenAt=null
 ```
 
-Current state, verified in this checkout: `tsc` clean, **77/77 tests**, `next build` exit 0 over
-9 screens and 12 API routes, chain `9/9`, and the committed ensemble breaking **F3 and F5**.
+Acceptance criteria that need a browser are measured, not inferred. With `npm run dev` already
+running:
+
+```bash
+npm run test:browser                    # 8 real-browser checks, ~90 s
+```
+
+It drives a real Chromium (`@sparticuz/chromium` vendors the binary inside its npm tarball; the
+NSS symbols it needs are stubbed with gcc because this container has no libnss3). Results here:
+**A1** 0 console errors and 0 hydration warnings, **A2** no horizontal scroll at 360/390 px,
+**A3** no nested anchors, **A4** every brief prints to exactly 1 A4 page (209.9 × 297.0 mm),
+**A11** WCAG AA clean, **A12** first contentful paint 160–328 ms cold against a 1500 ms budget.
+See `REVIEW.md` §6.1 for the three real defects this found and the two ways my own harness lied
+first.
+
+Current state, verified in this checkout: `tsc` clean, **93/93 tests** plus **8/8 browser
+checks**, `next build` exit 0 over 9 screens and 12 API routes, chain `9/9`, and the committed
+ensemble breaking **F3 and F5**.
 
 No network is required at runtime, and there is no Google Fonts CDN call — the three families are
 self-hosted woff2 in `public/fonts/`.
@@ -64,6 +80,15 @@ self-hosted woff2 in `public/fonts/`.
 5. **The swarm is a sensitivity analysis, not research.** 240 synthetic agents, no language model, the
    prior table on screen. Its output is a frequency with n and a 95% Wilson interval.
 
+## The optional model path
+
+`ENERGYPOOR_MODEL=1` switches on an OpenAI-compatible structurer in `src/domain/structure.ts`.
+It is **off by default**, and off is not a degraded mode: a test asserts that `fetch` is never
+called and that the result is byte-identical to the rules engine. When it is on, a model answer
+may only *append* a validated action — never a barrier, never a change to a `restricted` flag —
+and any failure (timeout, HTTP error, bad JSON, wrong shape) falls back to the rules and reports
+an `E-MODEL-*` code on the draft. The demo ships with it off.
+
 ## What this is not
 
 - No kWh dashboard, no savings calculator, no CO₂ estimate.
@@ -72,7 +97,8 @@ self-hosted woff2 in `public/fonts/`.
   and with a schema assertion on `/api/cases`.
 - No integration that shows a household's file to a landlord, a corporation's arrears system or a supplier.
   `/api/household/:ref/brief?share=corporation` returns `E-NOSHARE-01`.
-- No real LLM call anywhere in the simulation. Ever.
+- No real LLM call anywhere in the simulation. Ever. (The optional structurer is a separate,
+  default-off path for the *note*, not the swarm, and it never runs without an explicit key.)
 
 ## The result that matters
 

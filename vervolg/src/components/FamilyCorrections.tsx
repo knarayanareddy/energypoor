@@ -66,7 +66,7 @@ export function FamilyCorrections({
         <h2 style={{ fontSize: 15, letterSpacing: "0.06em", textTransform: "uppercase", color: "#6d6659" }}>
           Klopt er iets niet?
         </h2>
-        <span className="small" style={{ color: "#8b8477" }}>
+        <span className="small" style={{ color: "var(--muted)" }}>
           {actions.length} afspraken
         </span>
       </div>
@@ -139,7 +139,7 @@ export function FamilyCorrections({
                 >
                   Correctie versturen
                 </button>
-                <span className="small" style={{ color: "#8b8477" }}>
+                <span className="small" style={{ color: "var(--muted)" }}>
                   Dit schrijft één nieuwe regel in het controlelogboek. Niets wordt overschreven.
                 </span>
               </div>
@@ -160,7 +160,7 @@ export function FamilyCorrections({
           {result.message}
         </p>
       )}
-      <p className="small" style={{ color: "#8b8477", marginTop: 8 }}>
+      <p className="small" style={{ color: "var(--muted)", marginTop: 8 }}>
         {displayNl} · uw dossier wordt nooit met de corporatie of leverancier gedeeld.
       </p>
     </div>

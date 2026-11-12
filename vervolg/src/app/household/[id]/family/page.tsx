@@ -108,7 +108,7 @@ export default async function FamilyPage({ params }: { params: Promise<{ id: str
         </div>
 
         <p style={{ marginTop: 24, fontSize: 14.5, color: "#6d6659" }}>{view.footer_nl}</p>
-        <p style={{ marginTop: 8, fontSize: 12, color: "#8b8477" }}>
+        <p style={{ marginTop: 8, fontSize: 12, color: "var(--muted)" }}>
           Demo — synthetic households. No real person&apos;s data is in this build.
         </p>
       </div>

@@ -272,10 +272,23 @@ footer.site {
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
+  /* A title plus a score pill does not fit on one line at 360 px. Wrapping is
+     the fix; without it the pill is clipped by the card's border radius. */
+  flex-wrap: wrap;
   padding: 12px 18px;
   border-bottom: 1px solid var(--line);
   background: var(--paper-2);
   border-radius: 8px 8px 0 0;
+}
+.card-head > * {
+  min-width: 0;
+}
+.card-head h2 {
+  flex: 0 1 auto;
+}
+.card-head .pill {
+  flex: 0 1 auto;
+  max-width: 100%;
 }
 .card-head h2 {
   margin: 0;
@@ -1234,6 +1247,12 @@ input[type="range"] {
   }
   .print-only {
     display: block !important;
+  }
+  /* The excluded-fields line is a disclosure, not a link. Purple at 10.5 px
+     reads as a hyperlink on paper and prints too light to survive a mono
+     laser printer, so it goes black here. */
+  .brief .excluded {
+    color: #000;
   }
 }
 .print-only {

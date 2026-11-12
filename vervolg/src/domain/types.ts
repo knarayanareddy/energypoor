@@ -141,7 +141,16 @@ export type ErrorCode =
   | "E-NOSHARE-01"
   | "E-NOEVAL-01"
   | "E-HOUSEVIEW-01"
-  | "E-CONFIRM-01";
+  | "E-CONFIRM-01"
+  // the optional model path fell back to the rules engine; the draft is still
+  // valid, but the coach is told which route produced it
+  | "E-MODEL-CONFIG"
+  | "E-MODEL-HTTP"
+  | "E-MODEL-EMPTY"
+  | "E-MODEL-INVALID"
+  | "E-MODEL-SHAPE"
+  | "E-MODEL-FIELD"
+  | "E-MODEL-UNREACHABLE";
 
 export interface CaseRow {
   ref: string;

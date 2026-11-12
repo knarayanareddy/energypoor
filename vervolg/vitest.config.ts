@@ -10,6 +10,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // src/test/ runs offline and needs nothing. src/test-browser/ needs the
+    // dev server plus a Chromium; it is a separate command (npm run test:browser)
     include: ["src/test/**/*.test.ts"],
     // the chain tests write to logs/audit.jsonl; keep them in one process so
     // the store's module-level mutex is real

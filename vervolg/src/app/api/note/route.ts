@@ -3,7 +3,7 @@
 // This is the "no save without confirmation" check (T-13) and it is testable:
 // call this twice and assert the audit log is unchanged.
 import { NextResponse } from "next/server";
-import { extract } from "@/domain/extract";
+import { structure, modelPathEnabled } from "@/domain/structure";
 import { buildBrief } from "@/domain/brief";
 import { findHousehold } from "@/server/store";
 import type { Draft, DraftAction, DraftBarrier, Household } from "@/domain/types";
@@ -46,7 +46,11 @@ export async function POST(req: Request) {
   }
 
   const visit_id = `V-${household.household_ref.toLowerCase()}-${visit_date ?? new Date().toISOString().slice(0, 10)}`;
-  const ex = extract(text, household.household_ref, visit_date ?? new Date().toISOString().slice(0, 10));
+  // §6.1: the model path is optional and off by default. When the flag is off
+  // this is the rules engine and nothing else — no network, same bytes. When it
+  // is on and the model fails, `structure` falls back and reports why in
+  // `errors`, which is surfaced on the draft rather than hidden.
+  const ex = await structure(text, household.household_ref, visit_date ?? new Date().toISOString().slice(0, 10));
 
   const actions: DraftAction[] = ex.actions.map((a, i) => ({
     action_id: `${visit_id}-D${i + 1}`,
@@ -85,6 +89,9 @@ export async function POST(req: Request) {
   if (ex.needs_input.length > 0) {
     errors.push({ code: "E-ACTION-01", message_nl: "Wie doet wat, en wanneer?" });
   }
+  for (const e of ex.errors) {
+    errors.push({ code: e.code, message_nl: `De modelroute is niet gebruikt (${e.detail}); de regels zijn toegepast.` });
+  }
 
   const previewHousehold: Household = {
     ...household,
@@ -112,5 +119,9 @@ export async function POST(req: Request) {
   };
 
   // No appendRow here, by design. POST /api/note is read-only.
-  return NextResponse.json({ draft, preview_brief });
+  return NextResponse.json({
+    draft,
+    preview_brief,
+    structure: { source: ex.source, model_enabled: modelPathEnabled() },
+  });
 }

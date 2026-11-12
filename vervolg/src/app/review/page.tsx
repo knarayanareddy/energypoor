@@ -45,8 +45,8 @@ export default function ReviewPage() {
         <div className="grid g3" style={{ margin: "18px 0" }}>
           <div className="tile calm">
             <div className="k">Tests</div>
-            <div className="v">77</div>
-            <div className="s">5 bestanden · T-01 … T-19 groen</div>
+            <div className="v">93</div>
+            <div className="s">6 bestanden · T-01 … T-19 groen</div>
           </div>
           <div className={`tile ${chain.brokenAt === null ? "calm" : "warm"}`}>
             <div className="k">Auditketen</div>
@@ -225,6 +225,22 @@ export default function ReviewPage() {
           byte-identiek achter.
         </p>
 
+        <h3>D-13 · Twee vraag-templates uit §8.3 zijn ongrammaticaal</h3>
+        <p>
+          §8.3 geeft de afleidingsregels als letterlijke templates, met <code>&lt;what&gt;</code> ={" "}
+          <em>&lt;object&gt; &lt;infinitief&gt;</em>. Invullen geeft &ldquo;Is kwijtschelding aanvragen
+          gelukt?&rdquo; en &ldquo;Wanneer wilt u de nieuwe brief aanvragen doen?&rdquo; — dubbele infinitieven.
+          De tweede is ronduit fout Nederlands; de eerste is nauwelijks te ontleden. Een brief die de coach
+          hardop niet kan voorlezen op de stoep is een fout in het artefact, geen stijlkwestie.
+        </p>
+        <p>
+          Beide zijn herschreven met dezelfde vraag en dezelfde determinisme:{" "}
+          <code>&lt;What&gt; — is dat gelukt? Zo nee, waar liep het vast?</code> en{" "}
+          <code>Wanneer gaat u &lt;what&gt;?</code>. Het aanwijzend voornaamwoord &ldquo;dat&rdquo; doet het
+          werk dat een vervoeging van een scheidbaar werkwoord zou moeten doen — en dat kan een regelmotor
+          niet betrouwbaar.
+        </p>
+
         <h2>3. De cijfers, uit deze build</h2>
         <table>
           <thead>
@@ -322,40 +338,92 @@ export default function ReviewPage() {
         )}
 
         <h2>5. Wat ik niet heb gedaan, en waarom</h2>
+        <p className="muted">
+          In een eerdere versie van deze pagina stond hier dat A1–A4 en A12 &ldquo;een browser nodig hebben die
+          er niet is&rdquo;, en dat het model-pad bewust niet gebouwd was. Dat eerste was een verkeerde conclusie
+          en dat tweede was een keuze die ik nu niet meer zou maken. Beide zijn rechtgezet; zie hieronder wat er
+          nog écht open staat.
+        </p>
+        <h3>Er is wél een browser, en hij meet</h3>
+        <p>
+          <code>@sparticuz/chromium</code> levert een Brotli-gecomprimeerde Chromium <em>binnen de npm-tarball</em>.
+          Geen CDN-download nodig. De binary linkte tegen drie NSS-bibliotheken die Debian hier niet meelevert;
+          met <code>gcc</code> staan de 44 geïmporteerde NSS/NSPR-symbolen als stub in{" "}
+          <code>scratch/nssstub/stub.c</code>, elk met NULL als antwoord. Chromium ziet dan &ldquo;geen
+          certificaat-database&rdquo; — genoeg voor <code>http://localhost</code>, en <strong>alleen</strong>
+          daarvoor: TLS werkt niet met deze stubs.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Criterium</th>
+              <th>Gemeten</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>A1 — console errors + hydration</td><td className="mono">0 over 9 routes × 4 viewports</td></tr>
+            <tr><td>A2 — horizontale pagina-scroll op 360/390 px</td><td className="mono">0 op alle 9 routes</td></tr>
+            <tr><td>A2b — elementen buiten bereik geknipt</td><td className="mono">0</td></tr>
+            <tr><td>A3 — geneste anchors</td><td className="mono">0</td></tr>
+            <tr><td>A4 — brief = één A4</td><td className="mono">1 pagina, 209,9 × 297,0 mm, 3 huishoudens</td></tr>
+            <tr><td>A11 — WCAG AA contrast</td><td className="mono">0 fouten over 6 routes</td></tr>
+            <tr><td>A12 — first contentful paint (koude cache)</td><td className="mono">160–328 ms (budget 1500)</td></tr>
+          </tbody>
+        </table>
+        <p>
+          Meten leverde <strong>drie echte fouten</strong> op die geen enkele stylesheet-assertie had gevonden: een
+          afgeknipte score-pill op <code>/survey</code> bij 360 px (<code>scrollWidth</code> 361 &gt;{" "}
+          <code>clientWidth</code> 330), drie tekstknopen op 3,71:1 contrast in de huishoudweergave, en een
+          paarse regel op de brief die op papier als hyperlink leest. Alle drie gefixt.
+        </p>
+        <p className="muted">
+          Twee meetfouten van mijzelf horen er ook bij. Mijn eerste contrastmeter las{" "}
+          <code>color(srgb …)</code> als <code>[0,0,0]</code> en meldde daardoor onterecht dat de topbar
+          onleesbaar was. En een regex op <code>/Type /Page</code> vond 0 pagina&rsquo;s omdat Chromium
+          gecomprimeerde object streams schrijft — pas een echte PDF-parser gaf het juiste antwoord.
+        </p>
+
+        <h3>Het model-pad is gebouwd</h3>
+        <p>
+          <code>src/domain/structure.ts</code> implementeert §6.1 rij 1. Drie eigenschappen maken de flag veilig:
+          <strong>uit is de standaard en uit is geen degradeerde modus</strong> (een test assert dat{" "}
+          <code>fetch</code> nooit wordt aangeroepen als de flag uit staat, en dat het resultaat byte-identiek is
+          aan <code>extract()</code>); <strong>een modelantwoord kan de gate niet verruimen</strong> (het mag
+          alleen een actie toevoegen waarvan actor, werkwoord+object en datum valideren — nooit een barrier, want
+          zonder de clausum-redactie van D-03 zou dat de leak opnieuw binnenhalen); en{" "}
+          <strong>falen is zichtbaar</strong> (timeout, HTTP-fout, geen JSON, verkeerde vorm, slechte datum: elk
+          geval geeft het regels-resultaat <em>plus</em> een <code>E-MODEL-*</code>-code die de coach op de
+          draft ziet). 16 tests.
+        </p>
+
+        <h3>Wat nog echt open staat</h3>
         <ul>
           <li>
-            <strong>Geen Playwright-run in deze omgeving.</strong> De acceptatiecriteria A1–A12 vragen een browser;
-            in deze sandbox is geen Chromium. Wat ik wél deed: <code>next build</code> is groen, er zijn geen
-            hydration-risico&rsquo;s (geen <code>Date</code> of <code>Math.random</code> in render),{" "}
-            <code>ssr: false</code> is nergens nodig, en de canvas-code is één client component. A2 (geen
-            horizontale overflow) is met CSS afgedwongen via <code>overflow-x: hidden</code> plus{" "}
-            <code>minmax(0, 1fr)</code> grids, niet met een meting. Dat is een zwakkere garantie en hoort hier te
-            staan.
+            <strong>Geen model-call tegen een echt endpoint.</strong> Er is geen API-key in deze omgeving en die
+            komt er niet. Alles hierboven is getest met geïnjecteerde <code>fetch</code>-doubles: een 503, een
+            throw, een timeout, kapotte JSON, een verkeerde actor, een slechte datum. De merge- en
+            fallback-logica is getest; de JSON van de leverancier is nooit gezien.
           </li>
           <li>
-            <strong>A12 (first paint &lt; 1,5 s) is niet gemeten.</strong> De pagina laadt drie woff2-bestanden van
-            ~20 kB, geen extern font, geen API-call bij de eerste render. Ik denk dat het klopt; ik heb het niet
-            aangetoond.
+            <strong>Geen energicoach geïnterviewd.</strong> Dat is stap 17:30 op dag 1 in de spec en het kan
+            niet in een sandbox. De brief is dus niet door zijn primaire gebruiker gevalideerd.
           </li>
           <li>
-            <strong>A4 (brief = één A4) is niet met een echte printer getest.</strong> De print-CSS zet{" "}
-            <code>@page A4</code>, verbergt alle chrome en houdt blokken bij elkaar. De inhoud van de brief is
-            begrensd door de fixtures (max. 9 acties, 4 vragen, 6 overdrachten). Ik heb het niet als PDF geteld.
+            <strong>Geen opgenomen 90-seconden screencast.</strong> De demo werkt offline; de fallback-video
+            bestaat niet.
           </li>
           <li>
-            <strong>Geen echte energicoach geïnterviewd.</strong> Dat is stap 17:30 op dag 1 in de spec en het kan
-            niet in een sandbox. De brief is dus niet door een coach gevalideerd.
+            <strong>De browsermetingen zijn van <code>next dev</code>, niet van een productiebuild.</strong> Een
+            dev-build is trager, dus A12 is een pessimistische bovengrens — maar het is een dev-build.
           </li>
           <li>
-            <strong>Geen opgenomen 90-seconden screencast.</strong> De demo werkt offline; de fallback-video bestaat
-            niet.
+            <strong>De NSS-stubs kunnen geen HTTPS.</strong> Alles wat de browsersuite assert is
+            http://localhost.
           </li>
           <li>
-            <strong>De model-pad achter de env-flag is niet gebouwd.</strong> De spec vraagt een optionele
-            LLM-route achter een flag die standaard uit staat. Die heb ik weggelaten in plaats van een stub te
-            bouwen die doet alsof: <code>src/domain/extract.ts</code> is de enige route, en dat is een bewuste
-            keuze — de demo moet met de stekker eruit werken en een niet-gebouwde optie is eerlijker dan een
-            dode knop.
+            <strong>De <code>/api/swarm</code>-route herberekent alleen bij niet-standaard{" "}
+            <code>runs</code>/<code>seed</code>.</strong> Het standaardpad serveert de gecommitte{" "}
+            <code>report.json</code>, zodat de getallen op het scherm de getallen in git zijn.
           </li>
         </ul>
 

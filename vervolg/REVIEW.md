@@ -22,12 +22,13 @@ in every case the implementation changed.
 |---|---|
 | Spec sections implemented | §0 – §19 |
 | Routes | 9 screens + 12 API routes, all 200 |
-| Tests | **77 green** in 5 files (`T-01` … `T-19`, chain, API, swarm determinism, layout) |
+| Tests | **93 green** in 6 files, plus **8 browser-measured** checks in a separate suite |
 | `next build` | exits 0 |
+| Browser | real Chromium; A1/A2/A3/A4/A11/A12 measured, not inferred |
 | `scripts/verify-chain.ts` | `total=9 verified=9 brokenAt=null` |
 | Restricted leakage | **0** across brief, family view, CSV, API and extractor output |
 | Falsifiers breaking the pitch | **2 of 6** (F3 trust, F5 leak) |
-| Deviations | 12, all listed in §3 |
+| Deviations | 13, all listed in §3 |
 
 ---
 
@@ -189,6 +190,35 @@ seeding, running the suite, and comparing the byte count — which is now the ch
 is taken once per file in `beforeAll`, restored once in `afterAll`, and the suite leaves the log
 byte-identical (asserted by the cycle in §2).
 
+### D-13 · Two of §8.3's own question templates are ungrammatical
+
+§8.3 gives the derivation rules as literal templates:
+
+```
+- For each `niet_gedaan` action: "Is <what> gelukt? Zo nee, waar liep het vast?"
+- For each action still `afgesproken` with `by_when === null`: "Wanneer wilt u <what> doen?"
+```
+
+`<what>` is `<object> <infinitive>` — "de energietoeslag bellen". Substituting gives *"Is
+kwijtschelding aanvragen gelukt?"* and *"Wanneer wilt u de nieuwe brief aanvragen doen?"* Both are
+doubled infinitives; the second is plainly wrong Dutch and the first is barely parseable. A brief
+handed to a coach who then cannot read the question aloud on a doorstep is a failure of the artefact,
+not a stylistic nit.
+
+The two templates are rewritten to keep the same question and the same determinism:
+
+| spec | build |
+|---|---|
+| `Is <what> gelukt? Zo nee, waar liep het vast?` | `<What> — is dat gelukt? Zo nee, waar liep het vast?` |
+| `Wanneer wilt u <what> doen?` | `Wanneer gaat u <what>?` |
+
+`<What> — is dat gelukt?` is grammatical for every phrase the extractor produces, because the
+anaphor "dat" does the work instead of trying to conjugate a separable verb the rules engine cannot
+parse. The `capFirst`/`lowerFirst` helpers exist only to make the substitution read naturally.
+
+This is a deviation from a verbatim spec string, which is why it is here rather than in a commit
+message.
+
 ---
 
 ## 4. Numbers this build actually produces
@@ -277,37 +307,91 @@ Two things about this table matter more than the numbers:
 
 ## 6. What is not done
 
-Stated plainly, because the spec's §18 makes "done" machine-checkable and three of its
-criteria were not machine-checked here.
+Fewer things than in the previous revision of this document. Three items that were listed here as
+"needs a browser" or "deliberately unbuilt" are now measured or built, and the way they were
+obtained is part of the record.
 
-1. **A1 (no console errors) was not measured in a browser.** No Chromium exists in this
-   environment and it cannot be downloaded from the allowed hosts. Mitigation: `next build` is
-   clean; there is no `new Date()`, `Math.random()`, `toLocaleString` or `dangerouslySetInnerHTML`
-   on any render path, so hydration cannot mismatch and there is no inner-HTML escape hatch.
+### 6.1 A browser was found, and A1/A2/A3/A4/A11/A12 are measured
 
-   **A2 and A3 now have structural tests** (`src/test/layout.test.ts`, 8 assertions) rather than
-   nothing. They enforce the mechanisms, not the pixels: no inline width above 350 px, every
-   two-column split collapses at 820 px, every grid/flex child is `min-width: 0`, wide tables
-   scroll themselves while `html, body` clip the page, and anchor depth is computed by a real
-   JSX scanner rather than a regex on proximity. A fixed-width declaration of 400 px added
-   tomorrow fails the suite. What is still unproven is the actual measured `scrollWidth` at
-   390 px — that needs a layout engine.
-2. **A4 (brief prints to exactly one A4) was not verified by printing.** The print stylesheet
-   sets `@page A4`, hides all chrome, and `break-inside: avoid`s each block. The brief's
-   content is bounded by the fixtures. Counting pages needs a print engine.
-3. **A12 (first paint < 1.5 s) was not measured.** Three woff2 files at ~20 kB each, no
-   external font, no API call on first render.
-4. **The optional model path is not built.** §2 asks for a structuration model behind an env
-   flag, off by default. A dead switch that pretends to be a capability is worse than an
-   honest single path: `src/domain/extract.ts` is the only structurer and it needs no
-   network. This is a deliberate cut, not an omission.
-5. **No energy coach was interviewed.** That is day 1, 17:30 in the spec's own plan, and it
-   cannot happen in a sandbox. The brief is therefore unvalidated by its primary user.
-6. **No recorded 90-second screencast** as the wifi fallback.
-7. **`/api/swarm` recomputes live only for non-default `runs`/`seed`.** The default path
-   serves the committed `report.json`, so the numbers on screen are the numbers in git.
+The claim "no Chromium in this sandbox" was true of the system, and wrong as a conclusion. The
+binary can be obtained without violating the network policy:
 
----
+1. `@sparticuz/chromium` vendors a Brotli-compressed Chromium **inside its npm tarball**, so
+   `npm install` from `registry.npmjs.org` is enough. No CDN download.
+2. The extracted binary linked against three NSS libraries that Debian does not ship here.
+   `gcc` was available, so `scratch/nssstub/stub.c` provides the 44 NSS/NSPR symbols Chromium
+   imports, each returning NULL. Chromium then sees "no certificate database" — which is
+   sufficient for `http://localhost` and **only** for that. TLS does not work against these
+   stubs and the file says so.
+3. `src/test-browser/measure.test.ts` drives it with `puppeteer-core`.
+
+Results, from `npm run test:browser` (8 checks, ~90 s):
+
+| | Measured |
+|---|---|
+| A1 console errors + hydration warnings | **0** across 9 routes × 4 viewports |
+| A2 horizontal page scroll at 360/390 px | **0** on all 9 routes |
+| A2b elements clipped out of reach | **0** (wide tables and the swarm chip row scroll inside their own container) |
+| A3 nested anchors | **0** |
+| A4 brief prints to one A4 | **1 page, 209.9 × 297.0 mm**, all three households, verified with a PDF parser |
+| A11 WCAG AA contrast | **0 failures** across 6 routes |
+| A12 first contentful paint, cold cache | **160–328 ms** against a 1,500 ms budget |
+
+Three real defects were found this way and fixed, which is the argument for measuring:
+
+- **`/survey` at 360 px:** `.card-head` was a non-wrapping flex row, so the score pill was
+  clipped by the card's border radius (`scrollWidth` 361 > `clientWidth` 330). Fixed with
+  `flex-wrap: wrap` and `min-width: 0`.
+- **`/household/HH-027/family` and `FamilyCorrections`:** three text nodes used a hard-coded
+  `#8b8477`, which is 3.71:1 on the family view's cream background — below AA. Replaced with
+  `var(--muted)` (5.14:1 worst case).
+- **The brief's excluded-fields line printed in `#7c3aed`** at 10.5 px, which reads as a
+  hyperlink on paper and survives a mono laser printer badly. Forced to black in `@media print`.
+
+Two measurement mistakes worth recording, because both produced *plausible* output:
+
+- **My own contrast harness lied first.** It parsed `color(srgb 0.96 0.95 0.91)` by taking the
+  first three numbers, so `srgb` became `[0,0,0]` and the topbar measured as white-on-black
+  (ratio 3.61). Every "failure" it reported was the parser's fault. The fix is in the test.
+- **`/Type /Page` regex found 0 pages** because Chromium writes compressed object streams, so
+  a naive scan sees no page tree. Counting was replaced with a real PDF parser (`pypdf`).
+
+### 6.2 The optional model path is built
+
+The previous revision argued that a flag which is documented but absent is worse than no flag.
+That reasoning still holds — which is why the flag now exists rather than being described.
+`src/domain/structure.ts` implements §6.1 row 1:
+
+- **Off is the default and off is not a degraded mode.** Unset means the rules engine, with no
+  code path that can reach the network. A test asserts `fetch` is never called when the flag is
+  off, and that the result is byte-identical to `extract()`.
+- **A model answer cannot widen the gate.** Model output is merged field by field: it may only
+  *append* an action whose actor, verb+object and date all validate, never a barrier (a barrier
+  without the clause-level redaction of D-03 would reintroduce the leak), and never a change to
+  a `restricted` flag or a `restricted_hits` entry. Asserted against N-010, the note that
+  carries both a health and a debt hit.
+- **Failure is visible.** Timeout, HTTP error, non-JSON, wrong shape, bad date, unknown actor —
+  each returns the rules result **and** an `E-MODEL-*` code that is surfaced on the draft and
+  shown to the coach as "the model route was not used; the rules were applied".
+
+16 tests in `src/test/model.test.ts`. The demo is unchanged with the flag off, which is how it
+ships.
+
+### 6.3 What is still genuinely not done
+
+1. **A model call against a real endpoint was never made.** There is no API key in this
+   environment and none will be added. Everything above is exercised against injected `fetch`
+   doubles: a 503, a throw, a timeout, malformed JSON, a wrong actor, a bad date. The merge and
+   fallback logic is tested; the vendor's actual JSON was not observed.
+2. **No energy coach was interviewed.** That is day 1, 17:30 in the spec's own plan, and it
+   cannot happen in a sandbox. The brief is unvalidated by its primary user.
+3. **No recorded 90-second screencast** as the wifi fallback.
+4. **The browser measurements are of `next dev`, not a production build.** A dev build is
+   slower, so A12 is a pessimistic bound rather than an optimistic one — but it is a dev build.
+5. **The NSS stubs mean the browser cannot browse HTTPS.** Anything the test suite asserts is
+   http://localhost only.
+6. **`/api/swarm` recomputes live only for non-default `runs`/`seed`.** The default path serves
+   the committed `report.json`.
 
 ## 7. The honest weakness of the product
 
