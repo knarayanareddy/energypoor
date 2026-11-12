@@ -162,8 +162,10 @@ export default async function Home() {
                   {t("home.aside.swarm.body")}
                 </p>
                 <div className="row wrap" style={{ gap: 4 }}>
+                  {/* The nine archetype labels are fixture data (§11.3) and stay
+                      Dutch; the wrapper is marked so this is visible, not implied. */}
                   {Object.values(ARCH).map((a) => (
-                    <span key={a.key} className="pill mono" title={a.who_nl}>
+                    <span key={a.key} className="pill mono" title={a.who_nl} lang="nl">
                       {a.label_nl} {a.n}
                     </span>
                   ))}
