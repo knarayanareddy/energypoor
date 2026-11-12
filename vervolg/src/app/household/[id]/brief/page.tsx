@@ -12,9 +12,15 @@ export const dynamic = "force-dynamic";
  * §8.3 — one A4 page, in Dutch, in this order. Nothing else is allowed on the
  * page. The chrome lives outside `.brief` and is hidden by @media print.
  */
-export default async function BriefPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BriefPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ lang?: string }>;
+}) {
   const { id } = await params;
-  const { locale, t } = await getI18n();
+  const { locale, t } = await getI18n(await searchParams);
   const h = findHousehold(id);
   if (!h) notFound();
   const b = buildBrief(h);

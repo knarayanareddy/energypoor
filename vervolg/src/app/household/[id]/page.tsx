@@ -10,9 +10,15 @@ import { getI18n } from "@/i18n/server";
 export const dynamic = "force-dynamic";
 
 
-export default async function HouseholdPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function HouseholdPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ lang?: string }>;
+}) {
   const { id } = await params;
-  const { locale, t } = await getI18n();
+  const { locale, t } = await getI18n(await searchParams);
   const h = findHousehold(id);
   if (!h) notFound();
 

@@ -13,9 +13,15 @@ export const dynamic = "force-dynamic";
  * label. Visibly different from the coach view so a juror can tell at a glance
  * which one they are looking at (§4).
  */
-export default async function FamilyPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function FamilyPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ lang?: string }>;
+}) {
   const { id } = await params;
-  const { locale, t } = await getI18n();
+  const { locale, t } = await getI18n(await searchParams);
   const h = findHousehold(id);
   if (!h) notFound();
 

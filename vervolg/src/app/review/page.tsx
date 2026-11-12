@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
  * components, one per language, sharing one figures object. Dutch is served by
  * default; the English body is a mirror, not a replacement.
  */
-export default async function ReviewPage() {
-  const { locale } = await getI18n();
+export default async function ReviewPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
+  const { locale } = await getI18n(await searchParams);
   const fig = reviewFigures();
 
   return (

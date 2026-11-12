@@ -34,7 +34,7 @@ Acceptance criteria that need a browser are measured, not inferred. With `npm ru
 running:
 
 ```bash
-npm run test:browser                    # 11 real-browser checks in both languages, ~4 min
+npm run test:browser                    # 12 real-browser checks in both languages, ~4.5 min
 ```
 
 It drives a real Chromium (`@sparticuz/chromium` vendors the binary inside its npm tarball; the
@@ -45,11 +45,14 @@ NSS symbols it needs are stubbed with gcc because this container has no libnss3)
 A1, A2, A2b, A3, A4, A11 and the mobile-nav check each run **twice — once per language** — because
 the English mirror is only real if it is measured. A twelfth check asserts that every screen
 renders in the language the cookie asks for, that the tab title follows it, and that the three
-pages showing Dutch case content carry the note explaining why.
+pages showing Dutch case content carry the note explaining why. A thirteenth, **B2**, is the one
+that matters most: it opens the app inside a frame on another site, where a cookie cannot be
+written at all, and asserts that the toggle still switches the whole document — `<html lang>`,
+tab title and top bar, not just the body — and that the next link click keeps the choice.
 See `REVIEW.md` §6.1 for the three real defects this found and the two ways my own harness lied
 first.
 
-Current state, verified in this checkout: `tsc` clean, **107/107 tests** plus **11/11 browser
+Current state, verified in this checkout: `tsc` clean, **107/107 tests** plus **12/12 browser
 checks**, `next build` exit 0 over 9 screens and 12 API routes, chain `9/9`, and the committed
 ensemble breaking **F3 and F5**.
 
@@ -57,8 +60,17 @@ ensemble breaking **F3 and F5**.
 
 The brief was written in Dutch, the households are in Groningen, and the coach reads Dutch. So
 **Dutch is the default and English is a mirror** — every screen, reachable from the toggle in the
-top right, chosen by a cookie (`vervolg-locale`) and resolved on the server so the first paint is
-already in the right language, with no flash and no `[lang]` segment doubling the nine routes.
+top right, and resolved on the server so the first paint is already in the right language, with no
+flash and no `[lang]` segment doubling the nine routes.
+
+The choice travels in the **URL** (`?lang=en`), not in a cookie. A cookie was the first design and
+it failed in the only environment that mattered: inside the preview's frame the app is a third
+party, `document.cookie` writes are silently discarded, and the button looked dead. So the URL is
+the mechanism — it works in any frame, survives a refresh and can be sent to someone — and the
+cookie (`vervolg-locale`) is a best-effort optimisation for plain link navigation, with the
+`Referer` forwarding the language when the cookie could not be stored. Resolution order is
+`?lang=` → middleware header → cookie → `nl`. `REVIEW.md` D-15 has the diagnosis, and browser check
+`B2` now pins it by opening the app inside a cross-site frame.
 
 What is translated is the **interface**: navigation, headings, labels, empty states, error
 sentences, the review, the lab's ten panels. What is **not** translated is the dossier content,

@@ -291,6 +291,113 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
     expect(bad).toEqual([]);
   }, 180000);
 
+  /**
+   * The language switch, measured where it actually broke.
+   *
+   * Reported symptom: "its not switching to english". Every localhost test
+   * passed, because a cookie is first-party there. The app was being read
+   * inside a frame on another site, where a cookie write is silently discarded
+   * — so a toggle that only set a cookie did nothing at all, with no error.
+   *
+   * Two properties are pinned here and both must hold with storage blocked:
+   *   1. clicking EN turns the WHOLE document English — `<html lang>`, the tab
+   *      title and the top bar, not just the body. A soft navigation re-renders
+   *      the page but preserves the root layout, so this is what catches a
+   *      `router.push` regression that leaves Dutch chrome over English prose.
+   *   2. a plain nav click afterwards stays English even though no cookie could
+   *      be stored, because the language travels in the URL and is forwarded
+   *      from the Referer.
+   */
+  it("B2 — the toggle works inside a cross-site frame, where cookies are blocked", async () => {
+    if (!available) return;
+    const { createServer } = await import("node:http");
+    // A top-level document on 127.0.0.1 framing the app on localhost: two
+    // different sites, which is the only way to get third-party storage rules.
+    const host = createServer((_req, res) => {
+      res.writeHead(200, { "content-type": "text/html" });
+      res.end(
+        `<!doctype html><html><body style="margin:0"><iframe src="${BASE}/" ` +
+          `style="width:1200px;height:820px;border:0"></iframe></body></html>`,
+      );
+    });
+    await new Promise<void>((r) => host.listen(0, "127.0.0.1", () => r()));
+    const port = (host.address() as { port: number }).port;
+
+    // Its own browser: the flag below is what actually blocks third-party
+    // storage, and the shared instance is launched without it for the other
+    // tests. Setting a cookie by `setCookie` would bypass the code path under
+    // test, so the language must be chosen by clicking.
+    const chromium = (await import("@sparticuz/chromium")).default;
+    const puppeteer = (await import("puppeteer-core")).default;
+    const framed = await puppeteer.launch({
+      args: [...chromium.args, "--no-sandbox", "--disable-dev-shm-usage", "--test-third-party-cookie-phaseout"],
+      executablePath: await chromium.executablePath(),
+      headless: true,
+      env: { ...process.env, LD_LIBRARY_PATH: process.env.NSS_STUB ?? path.join(process.cwd(), "tools", "nss-stub", "lib") },
+    });
+
+    const page = await framed.newPage();
+    await page.setViewport({ width: 1300, height: 900 });
+    await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "networkidle0", timeout: 60000 });
+    await new Promise((r) => setTimeout(r, 1500));
+
+    const frameFor = () => {
+      const f = page.frames().find((x: any) => x.url().startsWith(BASE));
+      if (!f) throw new Error("the app frame did not load");
+      return f;
+    };
+    let frame = frameFor();
+
+    const before = (await frame.evaluate(`document.documentElement.getAttribute("lang")`)) as string;
+    expect(before, "the frame must start in Dutch").toBe("nl");
+
+    // Precondition, not a nicety: if this frame COULD write a cookie the test
+    // would be measuring the easy path and would pass for the wrong reason.
+    const cookie = (await frame.evaluate(`(() => {
+      document.cookie = "probe=1; path=/; max-age=600; samesite=lax";
+      return document.cookie;
+    })()`)) as string;
+    expect(cookie, "this browser is not blocking third-party storage; the test would not be meaningful").toBe("");
+
+    await frame.evaluate(`(() => {
+      [...document.querySelectorAll(".locale-toggle button")].find(b => b.textContent.trim() === "EN").click();
+    })()`);
+    await new Promise((r) => setTimeout(r, 3500));
+
+    frame = frameFor();
+    const after = (await frame.evaluate(`(() => ({
+      lang: document.documentElement.getAttribute("lang"),
+      title: document.title,
+      nav: [...document.querySelectorAll(".nav a")].map(a => a.textContent.trim()).join("|"),
+      toggle: document.querySelector(".locale-toggle button.on")?.textContent,
+      h1: document.querySelector("main h1")?.textContent ?? "",
+      url: location.href,
+    }))()`)) as Record<string, string>;
+
+    expect(after.lang, "html lang did not switch inside the frame").toBe("en");
+    expect(after.toggle, "the toggle still shows Dutch as selected").toBe("EN");
+    expect(after.nav, "the top bar is still Dutch over English content").toContain("Caseload");
+    expect(after.url, "the chosen language is not in the URL").toContain("lang=en");
+    expect(after.h1, "the body did not switch").not.toMatch(/De afspraak die niemand onthoudt/);
+
+    // The follow-through: no cookie was stored, so this can only work if the
+    // language is carried by the link and the Referer.
+    await frame.evaluate(`(() => {
+      [...document.querySelectorAll(".nav a")].find(a => a.getAttribute("href") === "/swarm").click();
+    })()`);
+    await new Promise((r) => setTimeout(r, 3500));
+    frame = frameFor();
+    const nav = (await frame.evaluate(`(() => ({
+      lang: document.documentElement.getAttribute("lang"),
+      url: location.href,
+    }))()`)) as Record<string, string>;
+    expect(nav.lang, "a plain nav click dropped the language back to Dutch with storage blocked").toBe("en");
+
+    await page.close();
+    await framed.close();
+    await new Promise<void>((r) => host.close(() => r()));
+  }, 120000);
+
   it("the dev-tools badge does not cover the synthetic-data disclaimer", async () => {
     if (!available) return;
     // The badge is a <nextjs-portal> shadow host at bottom-left. Whatever sits

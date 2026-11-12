@@ -22,13 +22,13 @@ in every case the implementation changed.
 |---|---|
 | Spec sections implemented | §0 – §19 |
 | Routes | 9 screens + 12 API routes, all 200 |
-| Tests | **107 green** in 7 files, plus **11 browser-measured** checks in a separate suite, each run in both languages |
+| Tests | **107 green** in 7 files, plus **12 browser-measured** checks in a separate suite, each run in both languages |
 | `next build` | exits 0 |
 | Browser | real Chromium; A1/A2/A3/A4/A11/A12 measured, not inferred |
 | `scripts/verify-chain.ts` | `total=9 verified=9 brokenAt=null` |
 | Restricted leakage | **0** across brief, family view, CSV, API and extractor output |
 | Falsifiers breaking the pitch | **2 of 6** (F3 trust, F5 leak) |
-| Deviations | 13, all listed in §3 |
+| Deviations | 14, all listed in §3 |
 
 ---
 
@@ -259,6 +259,53 @@ language can leave the other behind. The mitigation is mechanical — the Englis
 empty value, on mismatched `{placeholders}`, and on an English string that is still the Dutch one.
 It cannot catch a translation that is present and wrong; only a reader can.
 
+### D-15 · The language toggle did nothing in the browser it was built for
+
+This one is the most useful thing in the build, so it is recorded in full.
+
+**Symptom.** The user reported three words: *"its not switching to english."*
+
+**What every test said.** The toggle worked. Six variants against the dev server and the same six
+against a production build — direct navigation and link navigation to `/`, `/swarm`, `/review` and
+a household page — all flipped `<html lang>` from `nl` to `en` and wrote the cookie. `curl` with
+`Cookie: vervolg-locale=en` returned `<html lang="en"`. Nothing in the suite was red.
+
+**Why the tests were wrong.** They all ran at `localhost`, where the app is a *first-party*
+document and a cookie write succeeds. The product is read inside a frame on the preview host — a
+different site — and there `document.cookie = …` is **silently discarded**: no exception, no console
+message, the read-back is `""`. The toggle set a cookie the server never saw, the server defaulted to
+Dutch, and the page reloaded in Dutch. It looked like a dead button. Reproducing it needed a
+top-level page on `127.0.0.1` framing the app on `localhost` with
+`--test-third-party-cookie-phaseout`; the write returned `""` on the first try.
+
+**The fix, in three parts, because there were three defects stacked:**
+
+1. **The language travels in the URL.** `?lang=en`, not a cookie. It works in any frame, survives a
+   refresh, and makes the chosen language a thing you can send to someone. The cookie is still
+   written when allowed, as an optimisation for plain link navigation.
+2. **A layout never receives `searchParams`, and neither does `generateMetadata`.** So the top bar
+   and the tab title kept Dutch while the page body went English — a worse result than not
+   switching. `src/middleware.ts` lifts `?lang=` into an `x-vervolg-lang` request header, and
+   `getLocale()` resolves **URL → header → cookie → `nl`**. One order, three readers.
+3. **It has to be a whole-document navigation.** With the header in place the body still switched
+   while `<html lang>` and the nav did not, because `router.push()` preserves the root layout across
+   a client transition. `window.location.assign` rebuilds the document, which is the only honest
+   way to change a document-level attribute.
+
+Finally, with storage blocked and no parameter on the href, the *next* plain link click would drop
+back to Dutch — the reader switches once and loses it immediately. The middleware therefore also
+reads the `Referer`: a link from a page that had `?lang=en` forwards it. That is weaker than a
+parameter (a bookmark or a typed URL starts in Dutch again), and deliberately so. A language is
+remembered per visit, not inferred about the reader.
+
+**The regression test is the point.** `B2` in the browser suite does not open the app at
+`localhost`; it serves a page on `127.0.0.1` that frames it, asserts *as a precondition* that a
+cookie write inside the frame reads back `""`, then clicks EN and requires `<html lang>`, the tab
+title, the nav and the nav's `aria-label` all to be English, and requires the next nav click to stay
+English. If a future change weakens the toggle back to a cookie, or back to `router.push`, B2 fails
+in the environment that matters. Twelve green checks said the feature worked; the one that framed
+the app was the only one telling the truth.
+
 ---
 
 ## 4. Numbers this build actually produces
@@ -365,7 +412,7 @@ binary can be obtained without violating the network policy:
    stubs and the file says so.
 3. `src/test-browser/measure.test.ts` drives it with `puppeteer-core`.
 
-Results, from `npm run test:browser` (11 checks, ~4 min, every route measured in **both**
+Results, from `npm run test:browser` (12 checks, ~4.5 min, every route measured in **both**
 languages):
 
 | | Measured |

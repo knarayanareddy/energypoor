@@ -6,8 +6,8 @@ import { getI18n } from "@/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function SwarmPage() {
-  const { locale } = await getI18n();
+export default async function SwarmPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
+  const { locale } = await getI18n(await searchParams);
   const report = JSON.parse(readFileSync(path.join(process.cwd(), "data", "swarm", "report.json"), "utf8")) as LabProps["report"];
   const personas = buildPersonas(240, report.seed_base);
   return (

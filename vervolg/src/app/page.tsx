@@ -8,8 +8,8 @@ import { ARCH, DIMENSIONS, N_AGENTS } from "@/domain/swarm/archetypes";
 
 export const dynamic = "force-dynamic";
 
-export default async function Home() {
-  const { t } = await getI18n();
+export default async function Home({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
+  const { t } = await getI18n(await searchParams);
   const rows = (await import("@data/cases.json")).default as CaseRow[];
   const households = (await import("@data/households.json")).default as unknown as Household[];
   const today = todayIso();

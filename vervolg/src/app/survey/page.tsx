@@ -22,8 +22,8 @@ function clamp60(text: string, max = 60): string {
   return (space > max * 0.6 ? cut.slice(0, space) : cut).trimEnd() + "…";
 }
 
-export default async function SurveyPage() {
-  const { t, locale } = await getI18n();
+export default async function SurveyPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
+  const { t, locale } = await getI18n(await searchParams);
   const COVERAGE = coverageRows(locale);
   const V1 = v1Items(locale);
   const personas = buildPersonas(240, 20261111);

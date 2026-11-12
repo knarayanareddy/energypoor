@@ -4,8 +4,8 @@ import { getI18n } from "@/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function VerifyPage() {
-  const { locale, t } = await getI18n();
+export default async function VerifyPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
+  const { locale, t } = await getI18n(await searchParams);
   const v = verifyLog();
   const { rows } = readLog();
   return (

@@ -5,7 +5,7 @@ import { NavLinks } from "@/components/NavLinks";
 import { LocaleToggle } from "@/components/LocaleToggle";
 import { getI18n } from "@/i18n/server";
 import { DICTS, parseLocale, LOCALE_COOKIE } from "@/i18n/dict";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 /**
  * The tab title is UI, not artefact, so it follows the language. Metadata is
@@ -13,7 +13,12 @@ import { cookies } from "next/headers";
  * layout body — the same cookie the layout itself uses.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = parseLocale((await cookies()).get(LOCALE_COOKIE)?.value);
+  // same three-step resolution as getLocale(): URL (via the middleware header),
+  // then cookie, then Dutch. Metadata gets neither props nor searchParams.
+  const fromUrl = (await headers()).get("x-vervolg-lang");
+  const locale = fromUrl
+    ? parseLocale(fromUrl)
+    : parseLocale((await cookies()).get(LOCALE_COOKIE)?.value);
   const labels = DICTS[locale];
   return { title: `${labels["brand.name"]} — ${labels["brand.tagline"]}`, description: labels["meta.description"] };
 }
