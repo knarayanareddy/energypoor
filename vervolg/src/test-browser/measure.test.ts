@@ -187,6 +187,37 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
     expect(bad).toEqual([]);
   }, 180000);
 
+  it("the mobile nav keeps every destination reachable and does not overlap the wordmark", async () => {
+    if (!available) return;
+    const problems: string[] = [];
+    for (const width of [360, 390]) {
+      const page = await browser.newPage();
+      await page.setViewport({ width, height: 700, isMobile: true, hasTouch: true });
+      await page.goto(BASE + "/", { waitUntil: "networkidle0", timeout: 60000 });
+      const m = (await page.evaluate(`(() => {
+        const wm = document.querySelector(".wordmark").getBoundingClientRect();
+        const nav = document.querySelector(".nav");
+        const links = [...nav.querySelectorAll("a")];
+        const last = links[links.length - 1];
+        nav.scrollLeft = nav.scrollWidth;
+        const r = last.getBoundingClientRect();
+        const navR = nav.getBoundingClientRect();
+        const tb = document.querySelector(".topbar").getBoundingClientRect();
+        return {
+          overlap: wm.right > navR.left + 1 && Math.abs(wm.top - navR.top) < 10,
+          reachable: r.right <= navR.right + 1,
+          rows: Math.round(tb.height),
+          last: last.textContent,
+        };
+      })()`)) as any;
+      if (m.overlap) problems.push(`${width}px: wordmark overlaps the nav`);
+      if (!m.reachable) problems.push(`${width}px: last nav item (${m.last}) unreachable`);
+      if (m.rows > 96) problems.push(`${width}px: topbar ${m.rows}px tall — nav has wrapped into rows`);
+      await page.close();
+    }
+    expect(problems).toEqual([]);
+  }, 60000);
+
   it("the dev-tools badge does not cover the synthetic-data disclaimer", async () => {
     if (!available) return;
     // The badge is a <nextjs-portal> shadow host at bottom-left. Whatever sits

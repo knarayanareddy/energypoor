@@ -330,12 +330,14 @@ Results, from `npm run test:browser` (8 checks, ~90 s):
 | | Measured |
 |---|---|
 | A1 console errors + hydration warnings | **0** across 9 routes × 4 viewports |
+| Dev badge vs the disclaimer | not covering it (asserted) |
 | A2 horizontal page scroll at 360/390 px | **0** on all 9 routes |
 | A2b elements clipped out of reach | **0** (wide tables and the swarm chip row scroll inside their own container) |
 | A3 nested anchors | **0** |
 | A4 brief prints to one A4 | **1 page, 209.9 × 297.0 mm**, all three households, verified with a PDF parser |
 | A11 WCAG AA contrast | **0 failures** across 6 routes |
 | A12 first contentful paint, cold cache | **160–328 ms** against a 1,500 ms budget |
+| Mobile nav at 360/390 px | two rows, no overlap, every link reachable |
 
 Three real defects were found this way and fixed, which is the argument for measuring:
 
@@ -357,6 +359,11 @@ Three real defects were found this way and fixed, which is the argument for meas
   sits outside the React tree so it cannot be fixed in JSX. A CSS rule hides it, and a browser
   test asserts that the element at that point is not the portal. A demo whose whole premise is
   "synthetic households" must not have that line obscured by a dev affordance.
+- **The topbar was unusable at 390 px.** The nav wrapped into four rows and the wordmark
+  collided with it. It now wraps as two rows (wordmark + badge, then the nav on one scrolling
+  line) with a mask-based fade at the right edge, because a hidden scrollbar hides the fact that
+  "Review" is 45 px off-screen. A browser test asserts no overlap, every destination reachable,
+  and a topbar under 96 px at both 360 and 390 px.
 - **`/survey` cut questionnaire items mid-word** with `slice(0, 60)`, producing rows ending in
   "…de vorige afspraak h". In a table of verbatim items that reads as a typo. Now clamped at a
   word boundary with the full text in `title`.

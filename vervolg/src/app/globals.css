@@ -176,6 +176,9 @@ p {
   top: 0;
   z-index: 40;
   display: flex;
+  /* Wrap as a unit, and keep the wordmark on its own line at narrow widths
+     rather than letting it collide with a four-row nav. */
+  flex-wrap: wrap;
   align-items: center;
   gap: 18px;
   padding: 10px 20px;
@@ -1188,11 +1191,37 @@ input[type="range"] {
   }
   .topbar {
     padding: 8px 14px;
-    gap: 10px;
+    gap: 8px 10px;
+    align-items: center;
+  }
+  /* row 1: wordmark + badge; row 2: the nav, on one line */
+  .topbar .wordmark {
+    order: 1;
+  }
+  .topbar > div:last-child {
+    order: 2;
+  }
+  .topbar .nav {
+    order: 3;
+    flex: 1 0 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 0;
+    /* A hidden scrollbar hides the fact that there is more to the right, so
+       fade the edge. The nav is 45 px too wide at 390 px and 75 px at 360 px;
+       Review is reachable but invisible without this cue. */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
+    padding-right: 18px;
+  }
+  .topbar .nav::-webkit-scrollbar {
+    display: none;
   }
   .nav a {
     padding: 6px 8px;
     font-size: 12px;
+    white-space: nowrap;
   }
 }
 
