@@ -43,12 +43,12 @@ NSS symbols it needs are stubbed with gcc because this container has no libnss3)
 **A3** no nested anchors, **A4** every brief prints to exactly 1 A4 page (209.9 × 297.0 mm),
 **A11** WCAG AA clean, **A12** first contentful paint 143–287 ms cold against a 1500 ms budget.
 A1, A2, A2b, A3, A4, A11 and the mobile-nav check each run **twice — once per language** — because
-the English mirror is only real if it is measured. A twelfth check asserts that every screen
-renders in the language the cookie asks for, that the tab title follows it, and that the three
-pages showing Dutch case content carry the note explaining why. A thirteenth, **B2**, is the one
-that matters most: it opens the app inside a frame on another site, where a cookie cannot be
-written at all, and asserts that the toggle still switches the whole document — `<html lang>`,
-tab title and top bar, not just the body — and that the next link click keeps the choice.
+the English mirror is only real if it is measured. **B** asserts that every screen renders in the
+language it was asked for, that the tab title follows it, and that the three pages showing Dutch
+case content carry the note explaining why. **B2** is the one that matters most: it opens the app
+inside a frame on another site, where a cookie cannot be written at all, and asserts that the
+toggle still switches the whole document — `<html lang>`, tab title and top bar, not just the
+body — and that the next link click keeps the choice.
 See `REVIEW.md` §6.1 for the three real defects this found and the two ways my own harness lied
 first.
 
