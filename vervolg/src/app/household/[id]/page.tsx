@@ -5,12 +5,14 @@ import { correctionsFor, findHousehold } from "@/server/store";
 import { buildBrief, formatDateLongNl, formatDateNl, monthsAgoNl, restrictedFieldNames, STALE_DAYS } from "@/domain/brief";
 import { ActionRow } from "@/components/ActionRow";
 import { RestrictedMarker } from "@/components/RestrictedMarker";
+import { getI18n } from "@/i18n/server";
 
 export const dynamic = "force-dynamic";
 
 
 export default async function HouseholdPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const { locale, t } = await getI18n();
   const h = findHousehold(id);
   if (!h) notFound();
 
@@ -27,7 +29,7 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
           <div>
             <div className="mono small muted" style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}>
               <Link href="/" className="linkish">
-                Caseload
+                {t("hh.crumb")}
               </Link>{" "}
               / {h.household_ref}
             </div>
@@ -44,10 +46,10 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
           </div>
           <div className="row wrap">
             <Link href={`/household/${h.household_ref}/brief`} className="btn primary">
-              Bezoekvoorbereiding
+              {t("hh.prep")}
             </Link>
             <Link href={`/household/${h.household_ref}/family`} className="btn">
-              Zo ziet het huishouden het
+              {t("hh.family_cta")}
             </Link>
           </div>
         </div>
@@ -55,30 +57,33 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
         {brief.stale_days > STALE_DAYS && (
           <div className="note-box" style={{ borderLeftColor: "var(--warm)" }}>
             <strong className="stale">
-              Laatste bezoek {monthsAgoNl(brief.stale_days)} geleden ({formatDateNl(h.last_visit)}).
+              {t("hh.stale", {
+                ago: monthsAgoNl(brief.stale_days),
+                date: formatDateNl(h.last_visit),
+              })}
             </strong>{" "}
             <span className="muted small">
-              Staleness van het dossier — geen uitspraak over het huishouden. Drempel: {STALE_DAYS} dagen.
+              {t("hh.stale.note", { days: STALE_DAYS })}
             </span>
           </div>
         )}
 
         <div className="grid g3">
           <div className="tile calm">
-            <div className="k">Gedaan</div>
+            <div className="k">{t("hh.done")}</div>
             <div className="v">{shared.filter((a) => a.status === "gedaan").length}</div>
-            <div className="s">met bewijs in woorden</div>
+            <div className="s">{t("hh.done.sub")}</div>
           </div>
           <div className="tile warm">
-            <div className="k">Niet gedaan</div>
+            <div className="k">{t("hh.dropped")}</div>
             <div className="v">{shared.filter((a) => a.status === "niet_gedaan").length}</div>
-            <div className="s">elke rij heeft een echte reden</div>
+            <div className="s">{t("hh.dropped.sub")}</div>
           </div>
           <div className="tile">
-            <div className="k">Nog open</div>
+            <div className="k">{t("hh.open")}</div>
             <div className="v">{shared.filter((a) => a.status === "afgesproken").length}</div>
             <div className="s">
-              {shared.filter((a) => a.status === "afgesproken" && !a.by_when).length} zonder datum
+              {t("hh.open.sub", { n: shared.filter((a) => a.status === "afgesproken" && !a.by_when).length })}
             </div>
           </div>
         </div>
@@ -86,12 +91,17 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
         <div className="grid split-3-2">
           <div className="card">
             <div className="card-head">
-              <h2>Afspraken</h2>
-              <span className="pill mono">{shared.length} gedeeld</span>
+              <h2>{t("hh.actions.head")}</h2>
+              <span className="pill mono">{t("hh.shared", { n: shared.length })}</span>
             </div>
             <div className="card-pad stack tight">
               {shared.map((a) => (
-                <ActionRow key={a.action_id} action={a} visitDate={byVisit.get(a.set_at_visit)?.date ?? null} />
+                <ActionRow
+                  key={a.action_id}
+                  action={a}
+                  visitDate={byVisit.get(a.set_at_visit)?.date ?? null}
+                  locale={locale}
+                />
               ))}
             </div>
           </div>
@@ -99,27 +109,26 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
           <div className="stack">
             <div className="card">
               <div className="card-head">
-                <h2>Beperkte velden</h2>
+                <h2>{t("hh.restricted.head")}</h2>
                 <span className="pill restricted">{fields.length}</span>
               </div>
               <div className="card-pad stack tight small">
-                {fields.length === 0 && <p className="muted">Geen.</p>}
+                {fields.length === 0 && <p className="muted">{t("hh.restricted.none")}</p>}
                 {fields.map((f) => (
                   <div key={f} className="row between">
                     <span className="mono">{f}</span>
-                    <RestrictedMarker />
+                    <RestrictedMarker locale={locale} />
                   </div>
                 ))}
                 <p className="muted" style={{ marginTop: 8 }}>
-                  De waarde staat in het dossier en is zichtbaar voor de coach — niet in de brief, niet in de
-                  huishoudweergave, niet in een export.
+                  {t("hh.restricted.note")}
                 </p>
               </div>
             </div>
 
             <div className="card">
               <div className="card-head">
-                <h2>Barrières</h2>
+                <h2>{t("hh.barriers.head")}</h2>
               </div>
               <div className="card-pad stack tight">
                 {h.barriers.map((b) => (
@@ -132,7 +141,7 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
                         {b.note_nl}
                       </span>
                     </span>
-                    {b.restricted && <RestrictedMarker />}
+                    {b.restricted && <RestrictedMarker locale={locale} />}
                   </div>
                 ))}
               </div>
@@ -140,11 +149,11 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
 
             <div className="card">
               <div className="card-head">
-                <h2>Correcties</h2>
+                <h2>{t("hh.corrections.head")}</h2>
                 <span className="pill mono">{corrections.length}</span>
               </div>
               <div className="card-pad stack tight small">
-                {corrections.length === 0 && <p className="muted">Nog geen correcties.</p>}
+                {corrections.length === 0 && <p className="muted">{t("hh.corrections.none")}</p>}
                 {corrections.map((c) => (
                   <div key={c.correction_id}>
                     <div className="mono" style={{ fontSize: 11 }}>
@@ -163,8 +172,8 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
 
         <div className="card">
           <div className="card-head">
-            <h2>Tijdlijn — append-only</h2>
-            <span className="pill mono">{h.visits.length} bezoeken</span>
+            <h2>{t("hh.timeline.head")}</h2>
+            <span className="pill mono">{t("hh.visits", { n: h.visits.length })}</span>
           </div>
           <div className="card-pad">
             <ul className="tl">
@@ -175,14 +184,18 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
                       {formatDateLongNl(v.date)} · {v.coach_ref} · <span className="mono">{v.visit_id}</span>
                     </span>
                     <span className="row" style={{ gap: 6 }}>
-                      <span className="pill mono">{v.actions_added.length} afspraken</span>
-                      {v.restricted_count > 0 && <span className="pill restricted">{v.restricted_count} beperkt</span>}
+                      <span className="pill mono">{t("hh.visit.actions", { n: v.actions_added.length })}</span>
+                      {v.restricted_count > 0 && (
+                        <span className="pill restricted">
+                          {t("hh.visit.restricted", { n: v.restricted_count })}
+                        </span>
+                      )}
                     </span>
                   </div>
                   <p style={{ marginTop: 6, fontSize: 13.5 }}>{v.transcript}</p>
                   {v.corrections.length > 0 && (
                     <div className="small" style={{ marginTop: 6, color: "var(--warm)" }}>
-                      {v.corrections.length} correctie(s) op dit bezoek
+                      {t("hh.visit.corrections", { n: v.corrections.length })}
                     </div>
                   )}
                 </li>
@@ -193,10 +206,9 @@ export default async function HouseholdPage({ params }: { params: Promise<{ id: 
 
         <div className="row between wrap small muted">
           <span>
-            Dit dossier is van het huishouden. Zij kunnen het inzien en corrigeren. Niets hiervan is met de
-            corporatie gedeeld.
+            {t("hh.foot")}
           </span>
-          <span className="mono">geen score · geen urgentie · geen risico</span>
+          <span className="mono">{t("hh.foot.noscores")}</span>
         </div>
       </div>
     </main>

@@ -1347,3 +1347,41 @@ table.tbl {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* ---------- language toggle ---------- */
+.locale-toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+.locale-toggle .loc {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1.4;
+}
+.locale-toggle .loc:hover {
+  color: var(--ink);
+}
+.locale-toggle .loc.on {
+  background: var(--ink);
+  color: var(--paper);
+  cursor: default;
+}
+.locale-toggle[data-pending="1"] {
+  opacity: 0.6;
+}
+@media print {
+  .locale-toggle {
+    display: none;
+  }
+}

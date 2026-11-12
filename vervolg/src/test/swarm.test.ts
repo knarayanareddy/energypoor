@@ -255,6 +255,15 @@ describe("T-17 — the simulation cannot steer the allocation or file logic", ()
         if (r.startsWith("app/swarm/")) continue;
         if (r.startsWith("app/api/swarm/")) continue;
         if (r === "components/SwarmLab.tsx") continue;
+        // the lab's UI copy: it imports the `Dim` *type* to key six translated
+        // labels, and must not import any behaviour.
+        if (r === "i18n/swarm.ts") {
+          expect(code).toMatch(/import\s+type\s+\{[^}]*\}\s+from\s+["']@\/domain\/swarm/);
+          expect(code, "i18n/swarm.ts may only import types from the engine").not.toMatch(
+            /import\s+(?!type)[^;]*domain\/swarm/,
+          );
+          continue;
+        }
         // the survey page and route present the instrument; they never run a
         // simulation that could reach the file logic
         if (r === "app/api/survey/route.ts") continue;

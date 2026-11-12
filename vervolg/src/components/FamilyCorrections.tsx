@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { t as tr, type DictKey, type Locale } from "@/i18n/dict";
 
 /**
  * W11 — the household can see and correct its own file. "dit klopt niet"
@@ -11,10 +12,13 @@ import { useRouter } from "next/navigation";
 export function FamilyCorrections({
   displayNl,
   actions,
+  locale,
 }: {
   displayNl: string;
   actions: { id: string; what: string }[];
+  locale: Locale;
 }) {
+  const t = (k: DictKey, v?: Record<string, string | number>) => tr(locale, k, v);
   const [open, setOpen] = useState<string | null>(null);
   const [value, setValue] = useState("");
   const [reason, setReason] = useState("");
@@ -44,7 +48,7 @@ export function FamilyCorrections({
     }
     setResult({
       ok: true,
-      message: `Bedankt. Uw correctie staat in het dossier (rij ${json.seq} van de keten).`,
+      message: t("fc.thanks", { seq: json.seq ?? "?" }),
     });
     setOpen(null);
     setValue("");
@@ -64,14 +68,14 @@ export function FamilyCorrections({
         }}
       >
         <h2 style={{ fontSize: 15, letterSpacing: "0.06em", textTransform: "uppercase", color: "#6d6659" }}>
-          Klopt er iets niet?
+          {t("fc.title")}
         </h2>
         <span className="small" style={{ color: "var(--muted)" }}>
-          {actions.length} afspraken
+          {t("fc.actions", { n: actions.length })}
         </span>
       </div>
       <p style={{ fontSize: 15, color: "#4b463c", marginTop: 4 }}>
-        U kunt elke afspraak hier corrigeren. De coach ziet uw correctie en niemand anders.
+        {t("fc.lede")}
       </p>
 
       <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
@@ -89,28 +93,28 @@ export function FamilyCorrections({
                   setResult(null);
                 }}
               >
-                {open === a.id ? "annuleren" : "dit klopt niet"}
+                {open === a.id ? t("fc.cancel") : t("fc.dispute")}
               </button>
             </div>
 
             {open === a.id && (
               <div style={{ marginTop: 8, display: "grid", gap: 8, background: "#fdfaf3", padding: 12, borderRadius: 8 }}>
                 <label className="lbl" style={{ color: "#6d6659" }}>
-                  Wat moet er staan?
+                  {t("fc.what")}
                 </label>
                 <input className="field" value={value} onChange={(e) => setValue(e.target.value)} />
                 <label className="lbl" style={{ color: "#6d6659" }}>
-                  Waarom? (niet verplicht)
+                  {t("fc.why")}
                 </label>
                 <input
                   className="field"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Bijvoorbeeld: dit is nooit afgesproken"
+                  placeholder={t("fc.why.placeholder")}
                 />
                 <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
                   <legend className="lbl" style={{ color: "#6d6659" }}>
-                    Welk veld?
+                    {t("fc.field")}
                   </legend>
                   <div style={{ display: "flex", gap: 6 }}>
                     <button
@@ -119,7 +123,7 @@ export function FamilyCorrections({
                       onClick={() => setField("what_nl")}
                       aria-pressed={field === "what_nl"}
                     >
-                      de afspraak
+                      {t("fc.field.what")}
                     </button>
                     <button
                       type="button"
@@ -127,7 +131,7 @@ export function FamilyCorrections({
                       onClick={() => setField("by_when")}
                       aria-pressed={field === "by_when"}
                     >
-                      de datum (JJJJ-MM-DD)
+                      {t("fc.field.date")}
                     </button>
                   </div>
                 </fieldset>
@@ -137,10 +141,10 @@ export function FamilyCorrections({
                   disabled={pending || value.trim().length === 0}
                   onClick={() => submit(a.id)}
                 >
-                  Correctie versturen
+                  {t("fc.send")}
                 </button>
                 <span className="small" style={{ color: "var(--muted)" }}>
-                  Dit schrijft één nieuwe regel in het controlelogboek. Niets wordt overschreven.
+                  {t("fc.note")}
                 </span>
               </div>
             )}
@@ -161,7 +165,7 @@ export function FamilyCorrections({
         </p>
       )}
       <p className="small" style={{ color: "var(--muted)", marginTop: 8 }}>
-        {displayNl} · uw dossier wordt nooit met de corporatie of leverancier gedeeld.
+        {t("fm.corrections_note", { name: displayNl })}
       </p>
     </div>
   );

@@ -1,9 +1,11 @@
 "use client";
 
-export function PrintButton() {
+import { t, type Locale } from "@/i18n/dict";
+
+export function PrintButton({ locale = "nl" }: { locale?: Locale }) {
   return (
     <button type="button" className="btn sm primary" onClick={() => window.print()}>
-      Afdrukken (A4)
+      {t(locale, "common.print")}
     </button>
   );
 }

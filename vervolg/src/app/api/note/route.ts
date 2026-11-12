@@ -7,17 +7,19 @@ import { structure, modelPathEnabled } from "@/domain/structure";
 import { buildBrief } from "@/domain/brief";
 import { findHousehold } from "@/server/store";
 import type { Draft, DraftAction, DraftBarrier, Household } from "@/domain/types";
+import { apiMessage, localeFromRequest } from "@/i18n/api";
 
 export const dynamic = "force-dynamic";
 
 let draftCounter = 0;
 
 export async function POST(req: Request) {
+  const loc = localeFromRequest(req);
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ code: "E-ACTION-01", error: "Ongeldige body." }, { status: 400 });
+    return NextResponse.json({ code: "E-ACTION-01", error: apiMessage(loc, "badBody") }, { status: 400 });
   }
   const { household_ref, text, visit_date, coach_ref } = (body ?? {}) as {
     household_ref?: string;
@@ -29,20 +31,20 @@ export async function POST(req: Request) {
   // stage 1 refuses a note with no household reference
   if (!household_ref || !household_ref.trim()) {
     return NextResponse.json(
-      { code: "E-ACTION-01", error: "Kies eerst een dossier. Een notitie zonder dossier wordt niet opgeslagen." },
+      { code: "E-ACTION-01", error: apiMessage(loc, "noDossier") },
       { status: 422 },
     );
   }
   if (!text || text.trim().length < 3) {
-    return NextResponse.json({ code: "E-ACTION-01", error: "Er staat geen notitie in." }, { status: 422 });
+    return NextResponse.json({ code: "E-ACTION-01", error: apiMessage(loc, "emptyNote") }, { status: 422 });
   }
   if (!coach_ref || !coach_ref.trim()) {
-    return NextResponse.json({ code: "E-CONFIRM-01", error: "Bevestig als coach." }, { status: 422 });
+    return NextResponse.json({ code: "E-CONFIRM-01", error: apiMessage(loc, "confirmAsCoach") }, { status: 422 });
   }
 
   const household = findHousehold(household_ref);
   if (!household) {
-    return NextResponse.json({ code: "E-HOUSEVIEW-01", error: "Onbekend dossier." }, { status: 404 });
+    return NextResponse.json({ code: "E-HOUSEVIEW-01", error: apiMessage(loc, "unknownDossier") }, { status: 404 });
   }
 
   const visit_id = `V-${household.household_ref.toLowerCase()}-${visit_date ?? new Date().toISOString().slice(0, 10)}`;

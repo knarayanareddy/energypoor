@@ -3,18 +3,39 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CaseRow, SortKey } from "@/domain/types";
-
-const SORT_LABELS: { key: SortKey; label: string }[] = [
-  { key: "staleness", label: "Langst niet gezien" },
-  { key: "open_actions", label: "Openstaande afspraken" },
-  { key: "never_followed_up", label: "Nooit nagevolgd" },
+const SORT_KEYS: { key: SortKey }[] = [
+  { key: "staleness" },
+  { key: "open_actions" },
+  { key: "never_followed_up" },
 ];
 
 /**
  * §7.4 — the sort control must say, next to the chosen key:
  * "Sorteert op het dossier, niet op de persoon."
  */
-export function CaseTable({ rows }: { rows: CaseRow[] }) {
+export interface CaseTableLabels {
+  sortStale: string;
+  sortOpen: string;
+  sortNever: string;
+  sortGroupAria: string;
+  sortNote: string;
+  dossier: string;
+  hood: string;
+  label: string;
+  days: string;
+  open: string;
+  dropped: string;
+  restricted: string;
+  foot: string;
+  rowTitle: string;
+}
+
+/** Labels arrive already resolved. A `t` function cannot cross the
+ *  server→client boundary (Next refuses to serialise a function), and passing
+ *  the dictionary object would ship 250 strings of every other screen's copy to
+ *  the browser for a table with eight column headers. So the server sends the
+ *  fourteen strings this table actually prints. */
+export function CaseTable({ rows, labels }: { rows: CaseRow[]; labels: CaseTableLabels }) {
   const [sort, setSort] = useState<SortKey>("staleness");
   const router = useRouter();
 
@@ -36,8 +57,8 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
         className="row between wrap"
         style={{ padding: "10px 14px", borderBottom: "1px solid var(--line)", gap: 10 }}
       >
-        <div className="seg" role="group" aria-label="Sorteersleutel">
-          {SORT_LABELS.map((s) => (
+        <div className="seg" role="group" aria-label={labels.sortGroupAria}>
+          {SORT_KEYS.map((s) => (
             <button
               key={s.key}
               type="button"
@@ -45,12 +66,12 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
               onClick={() => setSort(s.key)}
               data-testid={`sort-${s.key}`}
             >
-              {s.label}
+              {s.key === "staleness" ? labels.sortStale : s.key === "open_actions" ? labels.sortOpen : labels.sortNever}
             </button>
           ))}
         </div>
         <span className="small muted" data-testid="sort-disclaimer">
-          Sorteert op het dossier, niet op de persoon.
+          {labels.sortNote}
         </span>
       </div>
 
@@ -58,13 +79,13 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
         <table className="tbl">
           <thead>
             <tr>
-              <th>Dossier</th>
-              <th>Wijk</th>
-              <th className="num">Label</th>
-              <th className="num">Dagen</th>
-              <th className="num">Open</th>
-              <th className="num">Vervallen</th>
-              <th>Beperkt</th>
+              <th>{labels.dossier}</th>
+              <th>{labels.hood}</th>
+              <th className="num">{labels.label}</th>
+              <th className="num">{labels.days}</th>
+              <th className="num">{labels.open}</th>
+              <th className="num">{labels.dropped}</th>
+              <th>{labels.restricted}</th>
             </tr>
           </thead>
           <tbody>
@@ -73,7 +94,7 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
                 key={r.ref}
                 data-clickable={hasHistory(r)}
                 onClick={() => hasHistory(r) && router.push(`/household/${r.ref}`)}
-                title={hasHistory(r) ? "Open dossier" : "Synthetische rij zonder historie"}
+                title={labels.rowTitle}
               >
                 <td>
                   <div style={{ fontWeight: hasHistory(r) ? 500 : 400 }}>
@@ -94,7 +115,7 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
                 <td className="num mono">{r.dropped_actions}</td>
                 <td>
                   {r.restricted_present ? (
-                    <span className="pill restricted">beperkt</span>
+                    <span className="pill restricted">{labels.restricted.toLowerCase()}</span>
                   ) : (
                     <span className="small muted">—</span>
                   )}
@@ -105,7 +126,7 @@ export function CaseTable({ rows }: { rows: CaseRow[] }) {
         </table>
       </div>
       <div className="small muted" style={{ padding: "8px 14px", borderTop: "1px solid var(--line)" }}>
-        Elke kolom is een feit over het dossier. Er is geen kolom met een oordeel.
+        {labels.foot}
       </div>
     </div>
   );

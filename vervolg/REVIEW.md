@@ -22,7 +22,7 @@ in every case the implementation changed.
 |---|---|
 | Spec sections implemented | §0 – §19 |
 | Routes | 9 screens + 12 API routes, all 200 |
-| Tests | **93 green** in 6 files, plus **8 browser-measured** checks in a separate suite |
+| Tests | **107 green** in 7 files, plus **11 browser-measured** checks in a separate suite, each run in both languages |
 | `next build` | exits 0 |
 | Browser | real Chromium; A1/A2/A3/A4/A11/A12 measured, not inferred |
 | `scripts/verify-chain.ts` | `total=9 verified=9 brokenAt=null` |
@@ -219,6 +219,46 @@ parse. The `capFirst`/`lowerFirst` helpers exist only to make the substitution r
 This is a deviation from a verbatim spec string, which is why it is here rather than in a commit
 message.
 
+### D-14 · English was added as a mirror, and the Dutch artefacts were deliberately left alone
+
+The brief, the household view and the extractor's rules are Dutch by requirement, not by accident
+(§8.3 "one A4 page, in Dutch"; §6.1 the household view is B1 Dutch; §7.2 a rule engine over Dutch
+text). Translating them was not an option, so the interface was separated from the artefacts:
+
+* **Translated:** navigation, every heading and label, empty states, the `/review` essay (as two
+  typed bodies over one figures object, so a number cannot drift between them), the lab's ten
+  panels, the instrument's coverage matrix, the v1 strawman questionnaire, and the API's refusal
+  sentences.
+* **Not translated, on purpose:** the brief, the household view, the 15 notes, the 3 households,
+  the 14 v2 instrument items, and the §8.1 restricted-gate lexicon. On an English screen the
+  affected pages carry a visible sentence saying why, and each is marked `lang="nl"` so assistive
+  technology reads Dutch as Dutch.
+* **The API's error *codes* never change.** `E-ACTION-01` is the contract from §9.3; only the
+  sentence beside it follows the cookie. A `curl` with no cookie still gets Dutch, which is what
+  the existing tests and `verify-chain.ts` assume.
+
+Three things this touched that a reviewer should know about, because each was a place where the
+bilingual change could quietly have weakened a guarantee:
+
+1. **W1's score-word grep** now has two more allow-listed files. They are the two halves of the
+   `/review` page, which quote §14.3 verbatim, and `src/i18n/dict.ts`, which holds the same copy in
+   both languages. The rule being enforced is "no *field* about a person"; the refusal itself is
+   prose. Naming them explicitly (rather than loosening the regex) keeps the test able to catch a
+   real field.
+2. **`t` cannot be passed to a client component.** The first attempt handed the translation
+   function straight into `CaseTable`, and Next refused to serialise it — which A1 caught as a 500
+   on `/` and a page error. The queue now receives fourteen resolved strings instead. That is also
+   smaller: shipping `t` would have sent every other screen's copy to the browser.
+3. **`src/i18n/swarm.ts` imports a type from the engine** (`Dim`, to key six labels). T-17 forbids
+   the simulation from reaching the file logic; the test now asserts that this file imports *only*
+   `import type` from `domain/swarm` and no behaviour.
+
+The cost is real and worth stating: there are now two copies of every sentence, and a change to one
+language can leave the other behind. The mitigation is mechanical — the English half is typed
+`Record<DictKey, string>` so a missing key fails the build, and `src/test/i18n.test.ts` fails on an
+empty value, on mismatched `{placeholders}`, and on an English string that is still the Dutch one.
+It cannot catch a translation that is present and wrong; only a reader can.
+
 ---
 
 ## 4. Numbers this build actually produces
@@ -325,18 +365,20 @@ binary can be obtained without violating the network policy:
    stubs and the file says so.
 3. `src/test-browser/measure.test.ts` drives it with `puppeteer-core`.
 
-Results, from `npm run test:browser` (8 checks, ~90 s):
+Results, from `npm run test:browser` (11 checks, ~4 min, every route measured in **both**
+languages):
 
 | | Measured |
 |---|---|
-| A1 console errors + hydration warnings | **0** across 9 routes × 4 viewports |
+| A1 console errors + hydration warnings | **0** across 9 routes × 4 viewports × 2 languages |
 | Dev badge vs the disclaimer | not covering it (asserted) |
 | A2 horizontal page scroll at 360/390 px | **0** on all 9 routes |
 | A2b elements clipped out of reach | **0** (wide tables and the swarm chip row scroll inside their own container) |
 | A3 nested anchors | **0** |
 | A4 brief prints to one A4 | **1 page, 209.9 × 297.0 mm**, all three households, verified with a PDF parser |
-| A11 WCAG AA contrast | **0 failures** across 6 routes |
-| A12 first contentful paint, cold cache | **160–328 ms** against a 1,500 ms budget |
+| A11 WCAG AA contrast | **0 failures** across 6 routes × 2 languages |
+| A12 first contentful paint, cold cache | **143–287 ms** against a 1,500 ms budget |
+| B every screen in the chosen language | asserted: `html lang`, tab title, nav labels, and the artefact note on the three Dutch pages |
 | Mobile nav at 360/390 px | two rows, no overlap, every link reachable |
 
 Three real defects were found this way and fixed, which is the argument for measuring:

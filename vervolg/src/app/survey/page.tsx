@@ -3,31 +3,11 @@ import { ITEMS, V1_ITEMS } from "@/domain/swarm/instrument";
 import { buildPersonas } from "@/domain/swarm/personas";
 import { runSwarm } from "@/domain/swarm/engine";
 import { answerInstrument } from "@/domain/swarm/instrument";
+import { getI18n } from "@/i18n/server";
+import { coverageRows } from "@/i18n/survey";
+import { v1Items } from "@/i18n/instrument";
 
 export const dynamic = "force-dynamic";
-
-const COVERAGE: { need: string; why: string; v1: string; v2: string }[] = [
-  {
-    need: "N1 · Accepteert het huishouden een zichtbaar dossier?",
-    why: "het permissiemodel is het product",
-    v1: "✗ nooit gevraagd",
-    v2: "✓ voice, q_visible",
-  },
-  { need: "N2 · Is follow-through geaccepteerd als maatstaf?", why: "het meetargument", v1: "✗", v2: "✓ metric" },
-  { need: "N3 · Wie betaalt volgens de populatie?", why: "bepaalt de verkooproute", v1: "deels (\"zorg\")", v2: "✓ payer" },
-  { need: "N4 · Neemt een coach op met spraak?", why: "adoptie sterft hier", v1: "✗", v2: "✓ adopt, q_capture" },
-  { need: "N5 · Vertrouwt het huishouden de gemeente?", why: "voorwaarde voor route 1", v1: "✗", v2: "✓ trust" },
-  { need: "N6 · Is sorteren eerlijk?", why: "de enige eerlijkheidsvraag die het product maakt", v1: "✗", v2: "✓ queue" },
-  {
-    need: "N7 · Hoe groot is het geheugenprobleem, gemeten?",
-    why: "de pitch zegt: de helft sterft",
-    v1: "✗",
-    v2: "✓ q_followthrough",
-  },
-  { need: "N8 · Welke barrière komt eerst?", why: "bepaalt de brief-template", v1: "deels", v2: "✓ q_barrier" },
-  { need: "N9 · Accepteren ze een huisbezoek?", why: "het levermodel", v1: "✗", v2: "✓ q_visit" },
-  { need: "N10 · Wat zou ze laten stoppen?", why: "churn, voordat het gebeurt", v1: "✗", v2: "✓ q_stop" },
-];
 
 /**
  * Truncate at a word boundary. `slice(0, 60)` cut items mid-word
@@ -42,7 +22,10 @@ function clamp60(text: string, max = 60): string {
   return (space > max * 0.6 ? cut.slice(0, space) : cut).trimEnd() + "…";
 }
 
-export default function SurveyPage() {
+export default async function SurveyPage() {
+  const { t, locale } = await getI18n();
+  const COVERAGE = coverageRows(locale);
+  const V1 = v1Items(locale);
   const personas = buildPersonas(240, 20261111);
   const run = runSwarm(personas, { seed: 20261111 });
   const sample = personas.slice(0, 3).map((p, i) => ({
@@ -63,26 +46,25 @@ export default function SurveyPage() {
       <div className="stack" style={{ gap: 16 }}>
         <div>
           <div className="mono small muted" style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Instrument · v1 en v2
+            {t("su.eyebrow")}
           </div>
-          <h1 style={{ marginTop: 4 }}>Twee vragenlijsten, en het gat ertussen</h1>
+          <h1 style={{ marginTop: 4 }}>{t("su.title")}</h1>
           <p className="muted" style={{ marginTop: 6, maxWidth: "74ch" }}>
-            v1 is wat een team standaard schrijft. v2 is de veertien items die dit product daadwerkelijk iets
-            kunnen leren. De matrix hieronder is het argument — niet de antwoorden.
+            {t("su.lede")}
           </p>
         </div>
 
         <div className="card">
           <div className="card-head">
-            <h2>Dekkingsmatrix</h2>
-            <span className="pill mono">v1: 2,5 / 10 · v2: 9,5 / 10</span>
+            <h2>{t("su.matrix")}</h2>
+            <span className="pill mono">{t("su.v1.dekking")}</span>
           </div>
           <div className="scroll-x" style={{ padding: 14 }}>
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>Noodzaak</th>
-                  <th>Waarom het telt</th>
+                  <th>{t("su.necessary")}</th>
+                  <th>{t("su.why")}</th>
                   <th>v1</th>
                   <th>v2</th>
                 </tr>
@@ -108,29 +90,33 @@ export default function SurveyPage() {
         <div className="grid g2">
           <div className="card">
             <div className="card-head">
-              <h2>v1 — tien vragen</h2>
-              <span className="pill mono">{V1_ITEMS.length} items</span>
+              <h2>{t("su.v1.head")}</h2>
+              <span className="pill mono">{V1.length} items</span>
             </div>
             <div className="card-pad">
               <ol className="small" style={{ paddingLeft: 18, lineHeight: 1.75 }}>
-                {V1_ITEMS.map((q) => (
+                {V1.map((q) => (
                   <li key={q}>{q}</li>
                 ))}
               </ol>
               <p className="small muted" style={{ marginTop: 10 }}>
-                Nul items over het geheugen, nul over het permissiemodel, één 1–5-schaal die niets voorspelt.
-                Daarom dekt v1 N1, N2 en N5 niet: het onderwerp komt er niet in voor.
+                {t("su.v1.note")}
               </p>
             </div>
           </div>
 
           <div className="card">
             <div className="card-head">
-              <h2>v2 — veertien items</h2>
+              <h2>{t("su.v2.head")}</h2>
               <span className="pill mono">{ITEMS.length} items</span>
             </div>
             <div className="card-pad">
-              <ol className="small" style={{ paddingLeft: 18, lineHeight: 1.7 }}>
+              {locale === "en" && (
+                <p className="small muted" data-testid="artefact-note" style={{ marginBottom: 8 }}>
+                  {t("su.items_note")}
+                </p>
+              )}
+              <ol className="small" lang="nl" style={{ paddingLeft: 18, lineHeight: 1.7 }}>
                 {ITEMS.map((it) => (
                   <li key={it.id}>
                     <span className="mono" style={{ color: "var(--muted)" }}>
@@ -152,14 +138,14 @@ export default function SurveyPage() {
 
         <div className="card">
           <div className="card-head">
-            <h2>Zo antwoordt een agent</h2>
-            <span className="pill synth">SYNTHETISCH</span>
+            <h2>{t("su.sample")}</h2>
+            <span className="pill synth">{t("common.synthetic")}</span>
           </div>
           <div className="scroll-x" style={{ padding: 14 }}>
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>Item</th>
+                  <th>{t("su.item")}</th>
                   {sample.map((s) => (
                     <th key={s.persona.id}>
                       {s.persona.name_nl}
@@ -202,18 +188,18 @@ export default function SurveyPage() {
             </table>
           </div>
           <div className="card-pad small muted" style={{ borderTop: "1px solid var(--line)" }}>
-            Antwoorden komen uit een deterministische functie, niet uit een model:{" "}
-            <code>likert5(o) = clamp(1 + round(o*4))</code>, en een optie wordt gekozen op zijn{" "}
-            <code>align</code>-veld tegen de huidige mening. Onthouding is een treffer, geen datagat.
+            {t("su.sample.note", {
+              likert: "likert5(o) = clamp(1 + round(o*4))",
+              align: "align",
+            })}
           </div>
         </div>
 
         <div className="grid g2">
           <div className="card card-pad">
-            <h2>Onthouding per archetype</h2>
+            <h2>{t("su.abstain")}</h2>
             <p className="small muted" style={{ marginTop: 4 }}>
-              <code>0.08 + 0.35 × (1 − trust)</code>. Hoog wantrouwen → vaker &ldquo;zeg ik liever niet&rdquo;. Dat
-              is een bevinding.
+              {t("su.abstain.note", { formula: "0.08 + 0.35 × (1 − trust)" })}
             </p>
             <table className="tbl" style={{ marginTop: 10 }}>
               <tbody>
@@ -229,24 +215,23 @@ export default function SurveyPage() {
           </div>
 
           <div className="card card-pad">
-            <h2>Export</h2>
+            <h2>{t("su.export")}</h2>
             <p className="small muted" style={{ marginTop: 4 }}>
-              240 synthetische respondenten. Elke rij heeft <code>synthetic: SYNTHETISCH</code> en de archetype
-              waar de prior vandaan komt.
+              {t("su.export.note")}
             </p>
             <div className="stack" style={{ marginTop: 12 }}>
               <a className="btn" href="/api/survey?version=v2" download>
-                v2 CSV — 14 items, incl. onthoudingen
+                {t("su.export.v2")}
               </a>
               <a className="btn ghost" href="/api/survey?version=v1" download>
-                v1 CSV — 10 items
+                {t("su.export.v1")}
               </a>
             </div>
             <p className="small muted" style={{ marginTop: 10 }}>
-              De export gaat nooit ergens heen. Geen enkele route in deze app post naar buiten.
+              {t("su.export.never")}
             </p>
             <Link href="/swarm" className="btn sm" style={{ marginTop: 8 }}>
-              Terug naar het lab
+              {t("su.back")}
             </Link>
           </div>
         </div>

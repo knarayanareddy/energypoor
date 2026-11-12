@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Draft, DraftAction, DraftBarrier } from "@/domain/types";
+import { t as tr, type DictKey, type Locale } from "@/i18n/dict";
 
 interface NoteFixture {
   id: string;
@@ -19,18 +20,21 @@ const HOUSEHOLDS = [
   { ref: "HH-041", label: "HH-041 · Dhr. Osei" },
 ];
 
-const KIND_NL: Record<string, string> = {
-  clean: "schone notitie",
-  vague: "vaag",
-  adversarial: "adversarieel — privacy",
-  "bilingual-tr": "NL/TR",
-  "bilingual-en": "NL/EN",
-  refusal: "weigering",
-  "no-date": "geen datum",
-  long: "lang",
+/** Fixture kinds, translated as UI labels. The notes themselves stay Dutch. */
+const KIND: Record<string, { nl: string; en: string }> = {
+  clean: { nl: "schone notitie", en: "clean note" },
+  vague: { nl: "vaag", en: "vague" },
+  adversarial: { nl: "adversarieel — privacy", en: "adversarial — privacy" },
+  "bilingual-tr": { nl: "NL/TR", en: "NL/TR" },
+  "bilingual-en": { nl: "NL/EN", en: "NL/EN" },
+  refusal: { nl: "weigering", en: "refusal" },
+  "no-date": { nl: "geen datum", en: "no date" },
+  long: { nl: "lang", en: "long" },
 };
 
-export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
+export function CaptureClient({ notes, locale }: { notes: NoteFixture[]; locale: Locale }) {
+  const t = (k: DictKey, v?: Record<string, string | number>) => tr(locale, k, v);
+  const kindLabel = (k: string) => KIND[k]?.[locale] ?? k;
   const [household, setHousehold] = useState("HH-027");
   const [visitDate, setVisitDate] = useState(() => new Date("2026-11-11").toISOString().slice(0, 10));
   const [text, setText] = useState("");
@@ -116,7 +120,7 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
     setRecording(false);
     // offer the fixture transcript for this household, honestly labelled
     const match = notes.find((n) => n.household_ref === household) ?? notes[0];
-    setTranscriptChip(`${match.id} · ${KIND_NL[match.kind] ?? match.kind}`);
+    setTranscriptChip(`${match.id} · ${kindLabel(match.kind)}`);
     setText(match.text);
   }
 
@@ -185,12 +189,11 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
     <div className="stack" style={{ gap: 18 }}>
       <div>
         <div className="mono small muted" style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}>
-          Bezoek vastleggen · stap 1–4
+          {t("cap.eyebrow")}
         </div>
-        <h1 style={{ marginTop: 4 }}>Eén minuut inspreken, drie afspraken eruit</h1>
+        <h1 style={{ marginTop: 4 }}>{t("cap.title")}</h1>
         <p className="muted" style={{ marginTop: 6, maxWidth: "64ch" }}>
-          Spreek in of typ. De extractor is een regelmachine over Nederlandse tekst — geen model, en het werkt
-          met de stekker eruit. Je ziet de uitkomst eerst; pas als jij bevestigt, gaat er iets naar het dossier.
+          {t("cap.lede")}
         </p>
       </div>
 
@@ -199,7 +202,7 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
           <div className="card card-pad stack">
             <div>
               <label className="lbl" htmlFor="hh">
-                Dossier
+                {t("cap.dossier")}
               </label>
               <select id="hh" className="field" value={household} onChange={(e) => setHousehold(e.target.value)}>
                 {HOUSEHOLDS.map((h) => (
@@ -211,7 +214,7 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
             </div>
             <div>
               <label className="lbl" htmlFor="date">
-                Bezoekdatum
+                {t("cap.date")}
               </label>
               <input
                 id="date"
@@ -222,8 +225,7 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
               />
             </div>
             <div className="small muted">
-              Stap 1 weigert een notitie zonder dossier. Daarom is het dossier een verplicht veld en geen
-              automatische invulling.
+              {t("cap.date.note")}
             </div>
           </div>
 
@@ -233,11 +235,11 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
               className="recbtn"
               data-recording={recording}
               onClick={recording ? stopRecording : startRecording}
-              aria-label={recording ? "Stop met opnemen" : "Start met opnemen"}
+              aria-label={recording ? t("cap.stop_aria") : t("cap.start_aria")}
             >
               {recording ? (
                 <span>
-                  STOP
+                  {t("cap.rec.stop")}
                   <br />
                   <span className="mono" style={{ fontSize: 13 }}>
                     {String(Math.floor(seconds / 60)).padStart(2, "0")}:
@@ -246,7 +248,7 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
                 </span>
               ) : (
                 <span>
-                  OPNAME
+                  {t("cap.rec.rec")}
                   <br />
                   <span style={{ fontSize: 18 }}>●</span>
                 </span>
@@ -269,25 +271,23 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
               })}
             </svg>
             <div className="small muted" style={{ textAlign: "center", maxWidth: "38ch" }}>
-              De opname is echt (MediaRecorder). De transcriptie is dat niet — na het stoppen krijg je een
-              vooraf geschreven fixture met een chip erbij.
+              {t("cap.record.note")}
             </div>
           </div>
         </div>
 
         <div className="card">
           <div className="card-head">
-            <h2>Notitie</h2>
+            <h2>{t("cap.note")}</h2>
             <div className="row" style={{ gap: 6 }}>
-              {transcriptChip && <span className="pill demo">demo transcript — no ASR called</span>}
-              <span className="pill mono">{text.length} tekens</span>
+              {transcriptChip && <span className="pill demo">{t("cap.demo.chip")}</span>}
+              <span className="pill mono">{t("cap.chars", { n: text.length })}</span>
             </div>
           </div>
           <div className="card-pad stack">
             {transcriptChip && (
               <div className="note-box small">
-                <strong>Let op:</strong> dit is een vaste fixture (<span className="mono">{transcriptChip}</span>),
-                geen spraakherkenning. Je kunt hem vrij aanpassen of helemaal weggooien.
+                {t("cap.demo.warn", { chip: transcriptChip })}
               </div>
             )}
             <textarea
@@ -297,8 +297,8 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
                 setText(e.target.value);
                 setTranscriptChip(null);
               }}
-              placeholder="Bijvoorbeeld: Ik bel de corporatie over de isolatie. Mevrouw begrijpt het formulier niet."
-              aria-label="Bezoeknotitie"
+              placeholder={t("cap.note.placeholder")}
+              aria-label={t("cap.textarea_aria")}
             />
             <div className="row between wrap" style={{ gap: 10 }}>
               <div className="row wrap" style={{ gap: 6 }}>
@@ -310,16 +310,16 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
                     onClick={() => {
                       setText(n.text);
                       setHousehold(n.household_ref);
-                      setTranscriptChip(`${n.id} · ${KIND_NL[n.kind] ?? n.kind}`);
+                      setTranscriptChip(`${n.id} · ${kindLabel(n.kind)}`);
                     }}
                     title={n.text}
                   >
-                    {n.id} · {KIND_NL[n.kind] ?? n.kind}
+                    {n.id} · {kindLabel(n.kind)}
                   </button>
                 ))}
               </div>
               <button type="button" className="btn primary" onClick={analyse} disabled={busy || text.trim().length < 3}>
-                {busy ? "Bezig…" : "Structureer →"}
+                {busy ? t("cap.busy") : t("cap.structure_btn")}
               </button>
             </div>
             {error && (
@@ -336,19 +336,19 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
         <div className="card card-pad" style={{ borderColor: "var(--calm)" }}>
           <div className="row between wrap">
             <div>
-              <h2 style={{ color: "var(--calm)" }}>Bevestigd en weggeschreven</h2>
+              <h2 style={{ color: "var(--calm)" }}>{t("cap.confirmed")}</h2>
               <p className="small muted" style={{ marginTop: 4 }}>
-                Bezoek <span className="mono">{confirmed.visit_id}</span> staat in de keten als rij{" "}
-                <span className="mono">{confirmed.seq}</span>. Hash{" "}
-                <span className="mono">{confirmed.hash.slice(0, 16)}…</span>
+                {t("cap.confirmed.body1")} <span className="mono">{confirmed.visit_id}</span>{" "}
+                {t("cap.confirmed.body2")} <span className="mono">{confirmed.seq}</span>.{" "}
+                {t("cap.confirmed.body3")} <span className="mono">{confirmed.hash.slice(0, 16)}…</span>
               </p>
             </div>
             <div className="row">
               <a className="btn sm" href={`/household/${household}`}>
-                Open dossier
+                {t("cap.open")}
               </a>
               <a className="btn sm" href="/verify">
-                Controleer de keten
+                {t("cap.verify")}
               </a>
             </div>
           </div>
@@ -358,11 +358,13 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
       {draft && (
         <div className="card">
           <div className="card-head">
-            <h2>Stap 4 — jij bevestigt, niet het systeem</h2>
+            <h2>{t("cap.step4")}</h2>
             <div className="row" style={{ gap: 6 }}>
-              <span className="pill mono">{actionCount} acties</span>
-              <span className="pill mono">{draft.barriers.length} barrières</span>
-              {draft.restricted_count > 0 && <span className="pill restricted">{draft.restricted_count} beperkt</span>}
+              <span className="pill mono">{t("cap.pill.actions", { n: actionCount })}</span>
+              <span className="pill mono">{t("cap.pill.barriers", { n: draft.barriers.length })}</span>
+              {draft.restricted_count > 0 && (
+                <span className="pill restricted">{t("cap.pill.restricted", { n: draft.restricted_count })}</span>
+              )}
             </div>
           </div>
           <div className="card-pad stack">
@@ -377,9 +379,9 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
               <div className="stack tight">
                 {draft.needs_input.map((n, i) => (
                   <div key={i} className="ask-row">
-                    <strong>Vraag de coach</strong> · {n.code} · {n.question_nl}
+                    <strong>{t("cap.ask")}</strong> · {n.code} · {n.question_nl}
                     <div className="muted" style={{ marginTop: 2, fontSize: 12 }}>
-                      &ldquo;{n.sentence}&rdquo; — hier is geen concrete actie uitgehaald. We verzinnen er geen.
+                      &ldquo;{n.sentence}&rdquo; {t("cap.ask.tail")}
                     </div>
                   </div>
                 ))}
@@ -387,24 +389,24 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
             )}
 
             {draft.actions.length === 0 && draft.needs_input.length === 0 && (
-              <p className="muted">Geen afspraken gevonden. Dat is een geldige uitkomst.</p>
+              <p className="muted">{t("cap.none")}</p>
             )}
 
             {draft.actions.map((a: DraftAction) => (
               <div className="action-edit" key={a.action_id}>
                 <div className="row between wrap">
                   <span className="mono small muted">
-                    {a.action_id} · wie: {a.who} · wanneer: {a.by_when ?? "geen datum"}
+                    {t("cap.action.meta", { id: a.action_id, who: a.who, when: a.by_when ?? t("cap.no_date") })}
                   </span>
                   <div className="row" style={{ gap: 6 }}>
-                    {a.restricted && <span className="pill restricted">beperkt veld</span>}
+                    {a.restricted && <span className="pill restricted">{t("cap.restricted_field")}</span>}
                     <button
                       type="button"
                       className={`chip ${edits[a.action_id] ? "active" : ""}`}
                       onClick={() => setEdits((p) => ({ ...p, [a.action_id]: !p[a.action_id] }))}
                       aria-pressed={!!edits[a.action_id]}
                     >
-                      {edits[a.action_id] ? "opslaan" : "weglaten"}
+                      {edits[a.action_id] ? t("cap.save") : t("cap.drop")}
                     </button>
                   </div>
                 </div>
@@ -412,11 +414,11 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
                   className="field"
                   value={whatEdits[a.action_id] ?? a.what_nl}
                   onChange={(e) => setWhatEdits((p) => ({ ...p, [a.action_id]: e.target.value }))}
-                  aria-label={`Actie ${a.action_id}`}
+                  aria-label={t("cap.action_aria", { id: a.action_id })}
                 />
                 {a.restricted && (
                   <span className="small" style={{ color: "var(--flag)" }}>
-                    De volledige zin staat in een beperkt veld en komt niet in de brief.
+                    {t("cap.restricted_note")}
                   </span>
                 )}
               </div>
@@ -425,7 +427,7 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
             {draft.barriers.length > 0 && (
               <div style={{ marginTop: 6 }}>
                 <h3 className="small muted" style={{ textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Barrières
+                  {t("cap.barriers")}
                 </h3>
                 <div className="stack tight" style={{ marginTop: 6 }}>
                   {draft.barriers.map((b: DraftBarrier) => (
@@ -436,7 +438,7 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
                         </span>
                         {b.note_nl}
                       </span>
-                      {b.restricted ? <span className="pill restricted">beperkt</span> : null}
+                      {b.restricted ? <span className="pill restricted">{t("cap.restricted")}</span> : null}
                     </div>
                   ))}
                 </div>
@@ -445,14 +447,14 @@ export function CaptureClient({ notes }: { notes: NoteFixture[] }) {
 
             <div className="row between wrap" style={{ marginTop: 6 }}>
               <span className="small muted">
-                Nog niets opgeslagen. Deze draft bestaat alleen in dit antwoord.
+                {t("cap.unsaved")}
               </span>
               <div className="row">
                 <button type="button" className="btn ghost" onClick={() => setDraft(null)}>
-                  Wegwerpen
+                  {t("cap.reject")}
                 </button>
                 <button type="button" className="btn primary" onClick={confirm} disabled={busy}>
-                  Bevestig als coach →
+                  {t("cap.confirm_btn")}
                 </button>
               </div>
             </div>

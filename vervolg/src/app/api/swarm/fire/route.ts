@@ -3,15 +3,17 @@
 import { NextResponse } from "next/server";
 import { buildPersonas } from "@/domain/swarm/personas";
 import { runSwarm, EVENTS } from "@/domain/swarm/engine";
+import { apiMessage, localeFromRequest } from "@/i18n/api";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const loc = localeFromRequest(req);
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Ongeldige body." }, { status: 400 });
+    return NextResponse.json({ error: apiMessage(loc, "badBody") }, { status: 400 });
   }
   const { event_id, seed, round, mixing, pressure } = (body ?? {}) as {
     event_id?: string;

@@ -1,6 +1,7 @@
 // GET /api/audit — the chain's state. POST /api/audit {op:"tamper"|"reset"} — dev only.
 import { NextResponse } from "next/server";
 import { readLog, resetTamper, tamperRow, verifyLog } from "@/server/store";
+import { apiMessage, localeFromRequest } from "@/i18n/api";
 
 export const dynamic = "force-dynamic";
 
@@ -19,14 +20,15 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const loc = localeFromRequest(req);
   if (process.env.NODE_ENV === "production" && process.env.ALLOW_TAMPER !== "1") {
-    return NextResponse.json({ ok: false, error: "Alleen in de demo." }, { status: 403 });
+    return NextResponse.json({ ok: false, error: apiMessage(loc, "demoOnly") }, { status: 403 });
   }
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ ok: false, error: "Ongeldige body." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: apiMessage(loc, "badBody") }, { status: 400 });
   }
   const { op, seq } = (body ?? {}) as { op?: string; seq?: number };
   if (op === "tamper") {
@@ -37,5 +39,5 @@ export async function POST(req: Request) {
     const r = resetTamper();
     return NextResponse.json({ ...r, verification: verifyLog() });
   }
-  return NextResponse.json({ ok: false, error: "op moet 'tamper' of 'reset' zijn." }, { status: 400 });
+  return NextResponse.json({ ok: false, error: apiMessage(loc, "opMustBe") }, { status: 400 });
 }

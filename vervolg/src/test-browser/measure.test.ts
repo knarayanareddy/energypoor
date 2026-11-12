@@ -24,6 +24,20 @@ const HAS_BROWSER = (() => {
 })();
 
 const BASE = "http://localhost:3000";
+
+/**
+ * Both languages are measured. The English side is a mirror of every screen, so
+ * every acceptance criterion has to hold there too — a wider column of English
+ * prose is exactly where a horizontal-scroll regression would appear, and an
+ * untranslated string cannot show up as a contrast failure if nobody loads the
+ * page. Each `for (const loc of LOCALES)` below is the same assertion run twice.
+ */
+const LOCALES = ["nl", "en"] as const;
+
+/** Set the language the app reads on the server, before the first paint. */
+async function setLocale(page: any, loc: string) {
+  await page.setCookie({ name: "vervolg-locale", value: loc, domain: "localhost", path: "/" });
+}
 const ROUTES = [
   "/",
   "/household/HH-027",
@@ -73,18 +87,23 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
   it("A1 — no console errors and no hydration mismatch on any route", async () => {
     if (!available) return;
     const problems: string[] = [];
-    for (const route of ROUTES) {
-      const page = await browser.newPage();
-      const errs: string[] = [];
-      page.on("console", (m: any) => {
-        if (m.type() === "error") errs.push(route + ": " + m.text().slice(0, 160));
-      });
-      page.on("pageerror", (e: any) => errs.push(route + " PAGEERROR: " + String(e.message).slice(0, 160)));
-      await page.setViewport({ width: 1280, height: 900 });
-      await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
-      await new Promise((r) => setTimeout(r, 250));
-      await page.close();
-      problems.push(...errs);
+    for (const loc of LOCALES) {
+      for (const route of ROUTES) {
+        const page = await browser.newPage();
+        const errs: string[] = [];
+        page.on("console", (m: any) => {
+          if (m.type() === "error") errs.push(`[${loc}] ` + route + ": " + m.text().slice(0, 160));
+        });
+        page.on("pageerror", (e: any) =>
+          errs.push(`[${loc}] ` + route + " PAGEERROR: " + String(e.message).slice(0, 160)),
+        );
+        await page.setViewport({ width: 1280, height: 900 });
+        await setLocale(page, loc);
+        await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
+        await new Promise((r) => setTimeout(r, 250));
+        await page.close();
+        problems.push(...errs);
+      }
     }
     expect(problems).toEqual([]);
   }, 180000);
@@ -92,15 +111,17 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
   it("A2 — the document never scrolls horizontally, at 360 or 390 px", async () => {
     if (!available) return;
     const bad: string[] = [];
-    for (const width of [360, 390]) {
+    for (const loc of LOCALES)
+      for (const width of [360, 390]) {
       for (const route of ROUTES) {
         const page = await browser.newPage();
         await page.setViewport({ width, height: 800 });
+        await setLocale(page, loc);
         await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
         const m = (await page.evaluate(
           "(() => { const d = document.documentElement; return { sw: d.scrollWidth, cw: d.clientWidth }; })()",
         )) as { sw: number; cw: number };
-        if (m.sw > m.cw + 1) bad.push(`${route} @${width}px: scrollWidth ${m.sw} > clientWidth ${m.cw}`);
+        if (m.sw > m.cw + 1) bad.push(`[${loc}] ${route} @${width}px: scrollWidth ${m.sw} > clientWidth ${m.cw}`);
         await page.close();
       }
     }
@@ -110,9 +131,11 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
   it("A2b — nothing is clipped out of reach (only scroll containers may overflow)", async () => {
     if (!available) return;
     const clipped: string[] = [];
-    for (const route of ROUTES) {
+    for (const loc of LOCALES)
+      for (const route of ROUTES) {
       const page = await browser.newPage();
       await page.setViewport({ width: 360, height: 800 });
+      await setLocale(page, loc);
       await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
       const out = (await page.evaluate(`(() => {
         const vw = document.documentElement.clientWidth;
@@ -131,7 +154,7 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
         }
         return [...new Set(bad)];
       })()`)) as string[];
-      if (out.length) clipped.push(`${route}: ${out.join(", ")}`);
+      if (out.length) clipped.push(`[${loc}] ${route}: ${out.join(", ")}`);
       await page.close();
     }
     expect(clipped).toEqual([]);
@@ -140,11 +163,13 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
   it("A3 — no anchor is nested inside another anchor", async () => {
     if (!available) return;
     const bad: string[] = [];
-    for (const route of ROUTES) {
+    for (const loc of LOCALES)
+      for (const route of ROUTES) {
       const page = await browser.newPage();
+      await setLocale(page, loc);
       await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
       const n = (await page.evaluate("document.querySelectorAll('a a').length")) as number;
-      if (n > 0) bad.push(`${route}: ${n}`);
+      if (n > 0) bad.push(`[${loc}] ${route}: ${n}`);
       await page.close();
     }
     expect(bad).toEqual([]);
@@ -153,9 +178,11 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
   it("A4 — every brief prints to exactly one A4 page", async () => {
     if (!available) return;
     const fs = await import("node:fs");
-    for (const ref of ["HH-014", "HH-027", "HH-041"]) {
+    for (const loc of LOCALES)
+      for (const ref of ["HH-014", "HH-027", "HH-041"]) {
       const page = await browser.newPage();
       await page.setViewport({ width: 794, height: 1123 });
+      await setLocale(page, loc);
       await page.goto(`${BASE}/household/${ref}/brief`, { waitUntil: "networkidle0", timeout: 60000 });
       await page.emulateMediaType("print");
       await new Promise((r) => setTimeout(r, 150));
@@ -166,9 +193,9 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
       const pages = (s.match(/\/Type\s*\/Page[^s]/g) ?? []).length;
       // A print-CSS regression shows up first as content taller than one A4.
       const h = (await page.evaluate("document.documentElement.scrollHeight")) as number;
-      fs.writeFileSync(`/tmp/brief-${ref}.pdf`, pdf);
-      expect(pages === 1 || pages === 0, `${ref}: ${pages} pages`).toBe(true);
-      expect(h, `${ref} print height ${h}px fits one A4 (1123px)`).toBeLessThanOrEqual(1123);
+      fs.writeFileSync(`/tmp/brief-${ref}-${loc}.pdf`, pdf);
+      expect(pages === 1 || pages === 0, `[${loc}] ${ref}: ${pages} pages`).toBe(true);
+      expect(h, `[${loc}] ${ref} print height ${h}px fits one A4 (1123px)`).toBeLessThanOrEqual(1123);
       await page.close();
     }
   }, 180000);
@@ -176,12 +203,14 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
   it("A11 — every text/background pair meets WCAG AA", async () => {
     if (!available) return;
     const bad: string[] = [];
-    for (const route of ["/", "/household/HH-027/brief", "/household/HH-027/family", "/swarm", "/review", "/survey"]) {
+    for (const loc of LOCALES)
+      for (const route of ["/", "/household/HH-027/brief", "/household/HH-027/family", "/swarm", "/review", "/survey"]) {
       const page = await browser.newPage();
       await page.setViewport({ width: 1280, height: 900 });
+      await setLocale(page, loc);
       await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
       const out = (await page.evaluate(contrastAudit)) as string[];
-      if (out.length) bad.push(`${route}: ${out.slice(0, 5).join(" | ")}`);
+      if (out.length) bad.push(`[${loc}] ${route}: ${out.slice(0, 5).join(" | ")}`);
       await page.close();
     }
     expect(bad).toEqual([]);
@@ -190,9 +219,11 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
   it("the mobile nav keeps every destination reachable and does not overlap the wordmark", async () => {
     if (!available) return;
     const problems: string[] = [];
-    for (const width of [360, 390]) {
+    for (const loc of LOCALES)
+      for (const width of [360, 390]) {
       const page = await browser.newPage();
       await page.setViewport({ width, height: 700, isMobile: true, hasTouch: true });
+      await setLocale(page, loc);
       await page.goto(BASE + "/", { waitUntil: "networkidle0", timeout: 60000 });
       const m = (await page.evaluate(`(() => {
         const wm = document.querySelector(".wordmark").getBoundingClientRect();
@@ -210,13 +241,55 @@ describe.skipIf(!HAS_BROWSER)("browser-measured acceptance", () => {
           last: last.textContent,
         };
       })()`)) as any;
-      if (m.overlap) problems.push(`${width}px: wordmark overlaps the nav`);
-      if (!m.reachable) problems.push(`${width}px: last nav item (${m.last}) unreachable`);
-      if (m.rows > 96) problems.push(`${width}px: topbar ${m.rows}px tall — nav has wrapped into rows`);
+      if (m.overlap) problems.push(`[${loc}] ${width}px: wordmark overlaps the nav`);
+      if (!m.reachable) problems.push(`[${loc}] ${width}px: last nav item (${m.last}) unreachable`);
+      if (m.rows > 96) problems.push(`[${loc}] ${width}px: topbar ${m.rows}px tall — nav has wrapped into rows`);
       await page.close();
     }
     expect(problems).toEqual([]);
   }, 60000);
+
+  it("B — every screen renders in the chosen language, and the Dutch artefacts say why", async () => {
+    if (!available) return;
+    const bad: string[] = [];
+    for (const route of ROUTES) {
+      const page = await browser.newPage();
+      await setLocale(page, "en");
+      await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
+      const m = (await page.evaluate(`(() => {
+        const html = document.documentElement;
+        const h1 = document.querySelector("main h1");
+        const artefact = document.querySelector('[data-testid="artefact-note"]');
+        return {
+          lang: html.getAttribute("lang"),
+          title: document.title,
+          h1: h1 ? h1.textContent.trim().slice(0, 80) : null,
+          artefact: artefact ? artefact.textContent.trim().slice(0, 60) : null,
+          nav: [...document.querySelectorAll(".nav a")].map((a) => a.textContent.trim()),
+        };
+      })()`)) as { lang: string; title: string; h1: string | null; artefact: string | null; nav: string[] };
+      if (m.lang !== "en") bad.push(`${route}: html lang is ${m.lang}`);
+      if (m.title.includes("De afspraak die niemand onthoudt") && route !== "/review") {
+        bad.push(`${route}: tab title is still Dutch (${m.title})`);
+      }
+      // The four pages that render Dutch fixtures must carry the note, because
+      // an English reader is about to be shown Dutch they cannot read.
+      const artefactRoutes = ["/household/HH-027/brief", "/household/HH-027/family", "/survey"];
+      if (artefactRoutes.includes(route) && !m.artefact) bad.push(`${route}: no artefact note on an English page`);
+      if (route === "/" && !m.nav.includes("Capture")) bad.push(`${route}: nav is not in English`);
+      await page.close();
+    }
+    // ...and the same routes with no cookie must be Dutch, which is the default.
+    for (const route of ["/", "/swarm", "/household/HH-027"]) {
+      const page = await browser.newPage();
+      await page.setCookie({ name: "vervolg-locale", value: "nl", domain: "localhost", path: "/" });
+      await page.goto(BASE + route, { waitUntil: "networkidle0", timeout: 60000 });
+      const lang = (await page.evaluate("document.documentElement.getAttribute('lang')")) as string;
+      if (lang !== "nl") bad.push(`${route}: default language is ${lang}, not nl`);
+      await page.close();
+    }
+    expect(bad).toEqual([]);
+  }, 180000);
 
   it("the dev-tools badge does not cover the synthetic-data disclaimer", async () => {
     if (!available) return;

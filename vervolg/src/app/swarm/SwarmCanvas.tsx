@@ -42,6 +42,8 @@ export interface SwarmCanvasProps {
   onPick: (i: number) => void;
   onFps?: (fps: number) => void;
   highlightId: string | null;
+  /** UI label drawn on the canvas; the caller passes the active language. */
+  decisionLabel: string;
 }
 
 function lerpColor(a: [number, number, number], b: [number, number, number], t: number): string {
@@ -371,7 +373,7 @@ export function SwarmCanvas(props: SwarmCanvasProps) {
       ctx.fillStyle = "rgba(226,196,120,0.85)";
       ctx.font = "500 9.5px ui-monospace, monospace";
       ctx.textAlign = "left";
-      ctx.fillText(`beslissingslijn ${p.decisionLine.toFixed(2)}`, dx + 5, 18);
+      ctx.fillText(`${p.decisionLabel} ${p.decisionLine.toFixed(2)}`, dx + 5, 18);
 
       // fps
       const f = fpsRef.current;

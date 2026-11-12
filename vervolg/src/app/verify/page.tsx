@@ -1,9 +1,11 @@
 import { readLog, verifyLog } from "@/server/store";
 import { AuditPanel } from "@/components/AuditPanel";
+import { getI18n } from "@/i18n/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function VerifyPage() {
+  const { locale, t } = await getI18n();
   const v = verifyLog();
   const { rows } = readLog();
   return (
@@ -11,40 +13,36 @@ export default async function VerifyPage() {
       <div className="stack" style={{ gap: 16 }}>
         <div>
           <div className="mono small muted" style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Audit · logs/audit.jsonl
+            {t("ver.eyebrow")}
           </div>
-          <h1 style={{ marginTop: 4 }}>De keten liegt niet</h1>
+          <h1 style={{ marginTop: 4 }}>{t("ver.title")}</h1>
           <p className="muted" style={{ marginTop: 6, maxWidth: "70ch" }}>
-            Elk bezoek en elke correctie is een regel met een sha256 over de canonieke JSON, gekoppeld aan de hash
-            van de vorige regel. Wijzig één regel in het bestand en de controleur wijst hem aan.
+            {t("ver.lede")}
           </p>
         </div>
 
         <div className="grid g3">
           <div className="tile">
-            <div className="k">Rijen</div>
+            <div className="k">{t("ver.rows")}</div>
             <div className="v">{v.total}</div>
-            <div className="s">append-only, geen gaten</div>
+            <div className="s">{t("ver.rows.sub")}</div>
           </div>
           <div className={`tile ${v.brokenAt === null ? "calm" : "warm"}`}>
-            <div className="k">Geverifieerd</div>
+            <div className="k">{t("ver.verified")}</div>
             <div className="v">{v.verified}</div>
-            <div className="s">sha256 opnieuw berekend</div>
+            <div className="s">{t("ver.verified.sub")}</div>
           </div>
           <div className={`tile ${v.brokenAt === null ? "calm" : "warm"}`}>
-            <div className="k">Eerste breuk</div>
-            <div className="v">{v.brokenAt ?? "geen"}</div>
-            <div className="s">{v.reason ?? "de keten is intact"}</div>
+            <div className="k">{t("ver.first_break")}</div>
+            <div className="v">{v.brokenAt ?? t("ver.intact")}</div>
+            <div className="s">{v.reason ?? t("ver.intact.sub")}</div>
           </div>
         </div>
 
-        <AuditPanel
-          initial={v}
-          rows={rows.slice(-40).reverse()}
-        />
+        <AuditPanel initial={v} rows={rows.slice(-40).reverse()} locale={locale} />
 
         <div className="card card-pad">
-          <h2>Hoe dit werkt</h2>
+          <h2>{t("ver.how")}</h2>
           <div className="prose" style={{ marginTop: 8 }}>
             <pre
               className="mono"
@@ -59,13 +57,10 @@ export default async function VerifyPage() {
             >{`// canonieke JSON: sleutels gesorteerd op elk niveau, dan sha256 over de exacte string
 hash = sha256(canonicalJson({ seq, ts, actor, action, subject, payload, prev_hash }))`}</pre>
             <p className="small muted">
-              De schrijver opent het bestand met <code>O_APPEND</code> en schrijft één regel per gebeurtenis, achter
-              een promise-keten als mutex. De lezer sorteert op <code>seq</code>, herberekent elke hash, en meldt de
-              eerste rij waar <code>prev_hash</code> of de hash zelf niet klopt.
+              {t("ver.how.body1", { open: "O_APPEND", seq: "seq", prev: "prev_hash" })}
             </p>
             <p className="small muted">
-              <code>npx tsx scripts/verify-chain.ts</code> doet hetzelfde buiten de browser, en geeft exitcode 1 bij
-              een breuk.
+              <code>npx tsx scripts/verify-chain.ts</code> {t("ver.how.body2")}
             </p>
           </div>
         </div>

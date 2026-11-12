@@ -50,8 +50,15 @@ const SCORE_WORDS = /\b(risk|score|prioriteit|priority|urgency|urgentie|willingn
 const T01_ALLOWED_FILES = new Set([
   "domain/invariants.ts",
   "test/w1.test.ts",
+  // the long-form review: quotes §14.3 verbatim, including the phrases it bans
   "app/review/page.tsx",
+  // the review split into two language bodies when English was added; both are
+  // prose, neither has a field
+  "app/review/_nl.tsx",
+  "app/review/_en.tsx",
   "domain/extract.ts",
+  // the UI dictionary holds the same §14.3 copy in both languages
+  "i18n/dict.ts",
 ]);
 
 export function scoreWordHits(): { file: string; hits: string[] }[] {

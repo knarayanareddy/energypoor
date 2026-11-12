@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { findHousehold } from "@/server/store";
 import { buildBrief, formatDateLongNl, formatDateNl, monthsAgoNl, STALE_DAYS } from "@/domain/brief";
 import { PrintButton } from "@/components/PrintButton";
+import { getI18n } from "@/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function BriefPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const { locale, t } = await getI18n();
   const h = findHousehold(id);
   if (!h) notFound();
   const b = buildBrief(h);
@@ -25,17 +27,23 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
           <Link href={`/household/${h.household_ref}`} className="linkish">
             {h.household_ref}
           </Link>{" "}
-          / bezoekvoorbereiding · één A4
+          / {t("bf.crumb")}
         </div>
         <div className="row">
           <Link href={`/household/${h.household_ref}/family`} className="btn sm">
-            Huishoudweergave
+            {t("bf.family_link")}
           </Link>
-          <PrintButton />
+          <PrintButton locale={locale} />
         </div>
       </div>
 
-      <article className="brief" id="brief">
+      {locale === "en" && (
+        <p className="no-print small muted" data-testid="artefact-note" style={{ marginBottom: 14 }}>
+          {t("common.artefact_note")}
+        </p>
+      )}
+
+      <article className="brief" id="brief" lang="nl">
         <header className="bh">
           <div>
             <div className="kicker">Vervolg · Bezoekvoorbereiding</div>

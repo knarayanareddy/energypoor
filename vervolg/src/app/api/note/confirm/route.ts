@@ -2,15 +2,17 @@
 import { NextResponse } from "next/server";
 import { appendRow, findHousehold } from "@/server/store";
 import type { Action, Barrier, DraftAction, DraftBarrier, Visit } from "@/domain/types";
+import { apiMessage, localeFromRequest } from "@/i18n/api";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const loc = localeFromRequest(req);
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ code: "E-ACTION-01", error: "Ongeldige body." }, { status: 400 });
+    return NextResponse.json({ code: "E-ACTION-01", error: apiMessage(loc, "badBody") }, { status: 400 });
   }
   const b = (body ?? {}) as {
     household_ref?: string;
@@ -25,14 +27,14 @@ export async function POST(req: Request) {
 
   // stage 4 refuses to save without a coach
   if (!b.coach_ref) {
-    return NextResponse.json({ code: "E-CONFIRM-01", error: "Bevestig als coach." }, { status: 422 });
+    return NextResponse.json({ code: "E-CONFIRM-01", error: apiMessage(loc, "confirmAsCoach") }, { status: 422 });
   }
   if (!b.household_ref) {
-    return NextResponse.json({ code: "E-ACTION-01", error: "Geen dossier." }, { status: 422 });
+    return NextResponse.json({ code: "E-ACTION-01", error: apiMessage(loc, "noDossierShort") }, { status: 422 });
   }
   const household = findHousehold(b.household_ref);
   if (!household) {
-    return NextResponse.json({ code: "E-HOUSEVIEW-01", error: "Onbekend dossier." }, { status: 404 });
+    return NextResponse.json({ code: "E-HOUSEVIEW-01", error: apiMessage(loc, "unknownDossier") }, { status: 404 });
   }
 
   const date = b.visit_date ?? new Date().toISOString().slice(0, 10);

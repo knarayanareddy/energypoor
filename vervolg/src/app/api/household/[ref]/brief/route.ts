@@ -2,14 +2,16 @@
 import { NextResponse } from "next/server";
 import { findHousehold } from "@/server/store";
 import { briefCsv, buildBrief } from "@/domain/brief";
+import { apiMessage, localeFromRequest } from "@/i18n/api";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request, { params }: { params: Promise<{ ref: string }> }) {
+  const loc = localeFromRequest(req);
   const { ref } = await params;
   const url = new URL(req.url);
   const h = findHousehold(ref);
-  if (!h) return NextResponse.json({ code: "E-HOUSEVIEW-01", error: "Onbekend dossier." }, { status: 404 });
+  if (!h) return NextResponse.json({ code: "E-HOUSEVIEW-01", error: apiMessage(loc, "unknownDossier") }, { status: 404 });
 
   if (url.searchParams.get("format") === "csv") {
     // exports are always non-restricted; there is no parameter that changes this
@@ -21,7 +23,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ ref: str
     });
   }
   if (url.searchParams.get("share") === "corporation") {
-    return NextResponse.json({ code: "E-NOSHARE-01", error: "Dit dossier wordt nooit met de corporatie gedeeld." }, { status: 403 });
+    return NextResponse.json({ code: "E-NOSHARE-01", error: apiMessage(loc, "neverSharedWithCorp") }, { status: 403 });
   }
   return NextResponse.json(buildBrief(h));
 }

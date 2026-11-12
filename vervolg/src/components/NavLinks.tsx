@@ -3,24 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const LINKS = [
-  { href: "/", label: "Caseload", exact: true },
-  { href: "/capture", label: "Vastleggen", exact: false },
-  { href: "/swarm", label: "Swarm Lab", exact: false },
-  { href: "/survey", label: "Instrument", exact: false },
-  { href: "/verify", label: "Audit", exact: false },
-  { href: "/review", label: "Review", exact: false },
+import type { DictKey } from "@/i18n/dict";
+
+/** Labels are dictionary keys, resolved on the server and passed down. */
+const LINKS: { href: string; key: DictKey; exact: boolean }[] = [
+  { href: "/", key: "nav.caseload", exact: true },
+  { href: "/capture", key: "nav.capture", exact: false },
+  { href: "/swarm", key: "nav.swarm", exact: false },
+  { href: "/survey", key: "nav.instrument", exact: false },
+  { href: "/verify", key: "nav.audit", exact: false },
+  { href: "/review", key: "nav.review", exact: false },
 ];
 
-export function NavLinks() {
+export function NavLinks({ labels, ariaLabel }: { labels: Record<DictKey, string>; ariaLabel: string }) {
   const pathname = usePathname();
   return (
-    <nav className="nav" aria-label="Hoofdnavigatie">
+    <nav className="nav" aria-label={ariaLabel}>
       {LINKS.map((l) => {
         const active = l.exact ? pathname === l.href : pathname.startsWith(l.href);
         return (
           <Link key={l.href} href={l.href} aria-current={active ? "page" : undefined}>
-            {l.label}
+            {labels[l.key]}
           </Link>
         );
       })}

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { correctionsFor, findHousehold } from "@/server/store";
 import { buildFamilyView, formatDateLongNl } from "@/domain/brief";
 import { FamilyCorrections } from "@/components/FamilyCorrections";
+import { getI18n } from "@/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function FamilyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const { locale, t } = await getI18n();
   const h = findHousehold(id);
   if (!h) notFound();
 
@@ -31,14 +33,20 @@ export default async function FamilyPage({ params }: { params: Promise<{ id: str
           <Link href={`/household/${h.household_ref}`} className="linkish">
             {h.household_ref}
           </Link>{" "}
-          / wat het huishouden ziet
+          / {t("fm.crumb")}
         </div>
         <Link href={`/household/${h.household_ref}/brief`} className="btn sm">
-          Coach-brief
+          {t("fm.coach_link")}
         </Link>
       </div>
 
-      <div className="familyview">
+      {locale === "en" && (
+        <p className="no-print small muted" data-testid="artefact-note" style={{ marginBottom: 12 }}>
+          {t("common.artefact_note")}
+        </p>
+      )}
+
+      <div className="familyview" lang="nl">
         <h1>Uw dossier</h1>
         <p className="intro">{view.intro_nl}</p>
 
@@ -104,12 +112,16 @@ export default async function FamilyPage({ params }: { params: Promise<{ id: str
         ))}
 
         <div style={{ marginTop: 26 }}>
-          <FamilyCorrections displayNl={h.display_nl} actions={shared.map((a) => ({ id: a.action_id, what: a.what_nl }))} />
+          <FamilyCorrections
+            displayNl={h.display_nl}
+            actions={shared.map((a) => ({ id: a.action_id, what: a.what_nl }))}
+            locale={locale}
+          />
         </div>
 
         <p style={{ marginTop: 24, fontSize: 14.5, color: "var(--muted)" }}>{view.footer_nl}</p>
         <p style={{ marginTop: 8, fontSize: 12, color: "var(--muted)" }}>
-          Demo — synthetic households. No real person&apos;s data is in this build.
+          {t("fm.demo")}
         </p>
       </div>
     </main>

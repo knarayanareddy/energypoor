@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { CaptureClient } from "@/components/CaptureClient";
+import { getI18n } from "@/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -14,12 +15,13 @@ export interface NoteFixture {
 }
 
 export default async function CapturePage() {
+  const { locale } = await getI18n();
   const notes = JSON.parse(readFileSync(path.join(process.cwd(), "data", "notes.json"), "utf8")) as NoteFixture[];
   // the capture screen offers the fixture transcripts; it never pretends to transcribe
   const offered = notes.filter((n) => ["N-001", "N-002", "N-010", "N-013", "N-004", "N-006"].includes(n.id));
   return (
     <main className="main narrow">
-      <CaptureClient notes={offered} />
+      <CaptureClient notes={offered} locale={locale} />
     </main>
   );
 }

@@ -2,11 +2,14 @@ import Link from "next/link";
 import type { Action, CaseRow, Household } from "@/domain/types";
 import { daysBetween, formatDateNl, todayIso } from "@/domain/brief";
 import { CaseTable } from "@/components/CaseTable";
+import { getI18n } from "@/i18n/server";
+import type { DictKey } from "@/i18n/dict";
 import { ARCH, DIMENSIONS, N_AGENTS } from "@/domain/swarm/archetypes";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  const { t } = await getI18n();
   const rows = (await import("@data/cases.json")).default as CaseRow[];
   const households = (await import("@data/households.json")).default as unknown as Household[];
   const today = todayIso();
@@ -42,49 +45,48 @@ export default async function Home() {
         <div className="row between wrap" style={{ alignItems: "flex-end" }}>
           <div>
             <div className="mono muted small" style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}>
-              Caseload · coach C-07 · gemeente Groningen
+              {t("home.eyebrow")}
             </div>
-            <h1 style={{ marginTop: 4 }}>De afspraak die niemand onthoudt</h1>
+            <h1 style={{ marginTop: 4 }}>{t("home.title")}</h1>
             <p className="muted" style={{ marginTop: 6, maxWidth: "62ch" }}>
-              Eén coach, {rows.length} dossiers. Wat vorige keer is afgesproken staat hieronder, en wat er
-              daarna gebeurde. Niets op dit scherm zegt iets over een persoon.
+              {t("home.lede", { n: rows.length })}
             </p>
           </div>
           <div className="row wrap">
             <Link href="/capture" className="btn primary">
-              Bezoek vastleggen
+              {t("home.cta.capture")}
             </Link>
             <Link href="/swarm" className="btn">
-              Swarm Lab
+              {t("home.cta.swarm")}
             </Link>
           </div>
         </div>
 
         <div className="grid g3">
           <div className="tile">
-            <div className="k">Dossiers · 3 met historie</div>
+            <div className="k">{t("home.tile.households")}</div>
             <div className="v">{rows.length}</div>
-            <div className="s">synthetic households, 30 rows</div>
+            <div className="s">{t("home.tile.households.sub", { n: rows.length })}</div>
           </div>
           <div className="tile">
-            <div className="k">Afspraken in de 3 dossiers</div>
+            <div className="k">{t("home.tile.actions")}</div>
             <div className="v">
               {done.length}
               <span className="muted" style={{ fontSize: 14 }}>
                 {" "}
-                / {total} gedaan
+                {" "}
+                / {total} {t("home.tile.done_label")}
               </span>
             </div>
             <div className="s">
-              {open.length} open · {dropped.length} niet gedaan ({pct(dropped.length)}%)
+              {t("home.tile.actions.sub", { done: done.length, open: open.length, dropped: dropped.length, pct: pct(dropped.length) })}
             </div>
           </div>
           <div className="tile warm">
-            <div className="k">Follow-through coverage</div>
+            <div className="k">{t("home.tile.coverage")}</div>
             <div className="v">{coverage}%</div>
             <div className="s">
-              {covered.length}/{eligible.length} opgevolgde afspraken; {eligible.length - covered.length} nooit
-              aangeraakt
+              {t("home.tile.coverage.sub", { covered: covered.length, eligible: eligible.length, missed: eligible.length - covered.length })}
             </div>
           </div>
         </div>
@@ -92,16 +94,34 @@ export default async function Home() {
         <div className="grid split-2-1">
           <div className="card" style={{ overflow: "hidden" }}>
             <div className="card-head">
-              <h2>Wachtrij — sorteer op het dossier, niet op de persoon</h2>
-              <span className="pill mono">{rows.length} rijen</span>
+              <h2>{t("home.queue.title")}</h2>
+              <span className="pill mono">{t("home.queue.rows", { n: rows.length })}</span>
             </div>
-            <CaseTable rows={rows} />
+            <CaseTable
+              rows={rows}
+              labels={{
+                sortStale: t("home.queue.sort.stale"),
+                sortOpen: t("home.queue.sort.open"),
+                sortNever: t("home.queue.sort.never"),
+                sortGroupAria: t("home.queue.sort.group"),
+                sortNote: t("home.queue.sort.note"),
+                dossier: t("col.dossier"),
+                hood: t("col.hood"),
+                label: t("col.label"),
+                days: t("col.days"),
+                open: t("col.open"),
+                dropped: t("col.dropped"),
+                restricted: t("col.restricted"),
+                foot: t("home.queue.foot"),
+                rowTitle: t("home.queue.row_title"),
+              }}
+            />
           </div>
 
           <div className="stack">
             <div className="card">
               <div className="card-head">
-                <h2>Wat blijft liggen</h2>
+                <h2>{t("home.aside.lie")}</h2>
               </div>
               <div className="card-pad stack tight">
                 {stale.map(({ h, days }) => (
@@ -114,34 +134,32 @@ export default async function Home() {
                   </Link>
                 ))}
                 <p className="small muted" style={{ marginTop: 6 }}>
-                  Staleness is het enige signaal van "dit vraagt aandacht" in het product, en het gaat over het dossier.
+                  {t("home.aside.lie.foot")}
                 </p>
               </div>
             </div>
 
             <div className="card">
               <div className="card-head">
-                <h2>Wat dit product niet doet</h2>
+                <h2>{t("home.aside.not")}</h2>
               </div>
               <div className="card-pad small" style={{ lineHeight: 1.65 }}>
-                <p>Geen kWh-dashboard. Geen besparingscalculator. Geen CO₂-schatting.</p>
-                <p style={{ marginTop: 6 }}>Geen cijfer over een huishouden — niet op risico, voorrang of geneigdheid.</p>
-                <p style={{ marginTop: 6 }}>
-                  Geen enkele integratie die een dossier aan een corporatie of leverancier laat zien.
-                </p>
+                <p>{t("home.aside.not.1")}</p>
+                <p style={{ marginTop: 6 }}>{t("home.aside.not.2")}</p>
+                <p style={{ marginTop: 6 }}>{t("home.aside.not.3")}</p>
                 <p style={{ marginTop: 6 }} className="muted">
-                  {restricted} beperkte velden bestaan in de fixtures; ze staan in geen enkel overzicht.
+                  {t("home.aside.not.4", { n: restricted })}
                 </p>
               </div>
             </div>
 
             <div className="card">
               <div className="card-head">
-                <h2>Swarm — {N_AGENTS} synthetische agenten</h2>
+                <h2>{t("home.aside.swarm")}</h2>
               </div>
               <div className="card-pad small stack tight">
                 <p className="muted">
-                  Zes dimensies, negen archetypes. De populatie is een aanname-tabel, geen onderzoek.
+                  {t("home.aside.swarm.body")}
                 </p>
                 <div className="row wrap" style={{ gap: 4 }}>
                   {Object.values(ARCH).map((a) => (
@@ -151,10 +169,10 @@ export default async function Home() {
                   ))}
                 </div>
                 <p className="mono small" style={{ color: "var(--muted)" }}>
-                  {DIMENSIONS.length} dims · beslissingslijn 0.5
+                  {t("home.dims", { n: DIMENSIONS.length })}
                 </p>
                 <Link href="/swarm" className="btn sm">
-                  Open het lab
+                  {t("home.open_lab")}
                 </Link>
               </div>
             </div>
@@ -163,8 +181,8 @@ export default async function Home() {
 
         <div className="card">
           <div className="card-head">
-            <h2>Drie huishoudens, één jaar</h2>
-            <span className="pill mono">4 bezoeken elk</span>
+            <h2>{t("home.cases.title")}</h2>
+            <span className="pill mono">{t("home.cases.visits")}</span>
           </div>
           <div className="grid g3" style={{ padding: 16 }}>
             {households.map((h) => {
@@ -179,22 +197,22 @@ export default async function Home() {
                   <div style={{ fontWeight: 500, marginTop: 4 }}>{h.display_nl}</div>
                   <div className="small muted">{h.composition_nl}</div>
                   <div className="row wrap" style={{ gap: 4, marginTop: 10 }}>
-                    <span className="pill done">{h.actions.filter((a) => a.status === "gedaan").length} gedaan</span>
-                    <span className="pill">{o.length} open</span>
-                    {d.length > 0 && <span className="pill dropped">{d.length} niet gedaan</span>}
+                    <span className="pill done">{t("home.cases.done", { n: h.actions.filter((a) => a.status === "gedaan").length })}</span>
+                    <span className="pill">{t("home.cases.open", { n: o.length })}</span>
+                    {d.length > 0 && <span className="pill dropped">{t("home.cases.dropped", { n: d.length })}</span>}
                   </div>
                   <div className="small muted" style={{ marginTop: 8 }}>
-                    Laatste bezoek {formatDateNl(h.last_visit)}
+                    {t("home.cases.last", { date: formatDateNl(h.last_visit) })}
                   </div>
                   <div className="row" style={{ gap: 6, marginTop: 10 }}>
                     <Link href={`/household/${h.household_ref}`} className="btn sm">
-                      Dossier
+                      {t("home.cases.dossier")}
                     </Link>
                     <Link href={`/household/${h.household_ref}/brief`} className="btn sm">
-                      Brief
+                      {t("home.cases.brief")}
                     </Link>
                     <Link href={`/household/${h.household_ref}/family`} className="btn sm ghost">
-                      Huishouden
+                      {t("home.cases.household")}
                     </Link>
                   </div>
                 </div>
@@ -205,49 +223,39 @@ export default async function Home() {
 
         <div className="grid g2">
           <div className="card card-pad">
-            <h2>Waarom dit bestaat</h2>
+            <h2>{t("home.why.title")}</h2>
             <p style={{ marginTop: 8, fontSize: 13.5, lineHeight: 1.62 }}>
-              Ongeveer <strong>550.000</strong> Nederlandse huishoudens zitten in energiearmoede. Gemeenten
-              draaien energiecoach-programma&apos;s; <strong>Dordrecht ging van 9,1% naar 5,1% in vier jaar</strong> —
-              de interventie werkt.
+              {t("home.why.p1a")} <strong>550.000</strong> {t("home.why.p1b")}{" "}
+              <strong>{t("home.why.p1c")}</strong>
             </p>
             <p style={{ marginTop: 8, fontSize: 13.5, lineHeight: 1.62 }}>
-              Wat het model breekt is <strong>geheugen</strong>: een coach met 120 huishoudens kan niet terugvinden
-              wat negen maanden geleden is afgesproken, dus elk bezoek begint opnieuw en de helft van de afspraken
-              sterft stil.
+              {t("home.why.p2a")} <strong>{t("home.why.p2strong")}</strong>
+              {t("home.why.p2b")}
             </p>
             <p className="small muted" style={{ marginTop: 10 }}>
-              Bronnen: TNO/CBS Monitor Energiearmoede 2025; gemeente Dordrecht programmaresultaten. Zie{" "}
+              {t("home.why.foot")}{" "}
               <Link href="/review" className="linkish">
-                de review
+                {t("home.why.link")}
               </Link>{" "}
-              voor elke afwijking van de spec.
+              {t("home.why.foot2")}
             </p>
           </div>
           <div className="card card-pad">
-            <h2>De zeven stadia</h2>
+            <h2>{t("home.stages.title")}</h2>
             <ol className="small" style={{ marginTop: 8, paddingLeft: 18, lineHeight: 1.8 }}>
-              <li>
-                <strong>INPUT</strong> — spraak of tekst. Weigert een notitie zonder dossier.
-              </li>
-              <li>
-                <strong>MODEL</strong> (optioneel) — weigert een actie zonder concreet werkwoord+object.
-              </li>
-              <li>
-                <strong>GATE</strong> — weigert gezondheid/schuld in een gedeeld veld.
-              </li>
-              <li>
-                <strong>MENS</strong> — weigert opslaan zonder bevestiging.
-              </li>
-              <li>
-                <strong>OPSLAG</strong> — append-only; weigert geschiedenis te overschrijven.
-              </li>
-              <li>
-                <strong>OUTPUT</strong> — de brief; weigert een beperkt veld.
-              </li>
-              <li>
-                <strong>MENS</strong> — het huishouden ziet en corrigeert; weigert interne notities.
-              </li>
+              {[
+                ["INPUT", "home.stages.1"],
+                ["MODEL", "home.stages.2"],
+                ["GATE", "home.stages.3"],
+                ["MENS", "home.stages.4"],
+                ["OPSLAG", "home.stages.5"],
+                ["OUTPUT", "home.stages.6"],
+                ["MENS", "home.stages.7"],
+              ].map(([name, key]) => (
+                <li key={key}>
+                  <strong>{name}</strong> {t(key as DictKey)}
+                </li>
+              ))}
             </ol>
           </div>
         </div>

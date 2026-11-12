@@ -24,7 +24,7 @@ npm run dev                             # http://localhost:3000
 ```
 
 ```bash
-npm test                                # 93 tests in 6 files; expect all green
+npm test                                # 107 tests in 7 files; expect all green
 npx tsc --noEmit                        # strict, clean
 npm run build                           # prebuild regenerates fixtures, personas and the 200-run ensemble
 npx tsx scripts/verify-chain.ts         # total=9 verified=9 brokenAt=null
@@ -34,20 +34,53 @@ Acceptance criteria that need a browser are measured, not inferred. With `npm ru
 running:
 
 ```bash
-npm run test:browser                    # 8 real-browser checks, ~90 s
+npm run test:browser                    # 11 real-browser checks in both languages, ~4 min
 ```
 
 It drives a real Chromium (`@sparticuz/chromium` vendors the binary inside its npm tarball; the
 NSS symbols it needs are stubbed with gcc because this container has no libnss3). Results here:
 **A1** 0 console errors and 0 hydration warnings, **A2** no horizontal scroll at 360/390 px,
 **A3** no nested anchors, **A4** every brief prints to exactly 1 A4 page (209.9 × 297.0 mm),
-**A11** WCAG AA clean, **A12** first contentful paint 160–328 ms cold against a 1500 ms budget.
+**A11** WCAG AA clean, **A12** first contentful paint 143–287 ms cold against a 1500 ms budget.
+A1, A2, A2b, A3, A4, A11 and the mobile-nav check each run **twice — once per language** — because
+the English mirror is only real if it is measured. A twelfth check asserts that every screen
+renders in the language the cookie asks for, that the tab title follows it, and that the three
+pages showing Dutch case content carry the note explaining why.
 See `REVIEW.md` §6.1 for the three real defects this found and the two ways my own harness lied
 first.
 
-Current state, verified in this checkout: `tsc` clean, **93/93 tests** plus **8/8 browser
+Current state, verified in this checkout: `tsc` clean, **107/107 tests** plus **11/11 browser
 checks**, `next build` exit 0 over 9 screens and 12 API routes, chain `9/9`, and the committed
 ensemble breaking **F3 and F5**.
+
+## Two languages, one product
+
+The brief was written in Dutch, the households are in Groningen, and the coach reads Dutch. So
+**Dutch is the default and English is a mirror** — every screen, reachable from the toggle in the
+top right, chosen by a cookie (`vervolg-locale`) and resolved on the server so the first paint is
+already in the right language, with no flash and no `[lang]` segment doubling the nine routes.
+
+What is translated is the **interface**: navigation, headings, labels, empty states, error
+sentences, the review, the lab's ten panels. What is **not** translated is the dossier content,
+and that is a design decision, not an omission:
+
+| Stays Dutch | Why |
+|---|---|
+| The pre-visit brief (§8.3) | The spec says one A4 page, in Dutch. It is read aloud on a doorstep. |
+| The household view (§6.1) | It is written in B1 Dutch *for the household*. Translating it would be a different artefact. |
+| The extractor's rules (§7.2) | A rule engine over Dutch text. `kwijtschelding`, `verblijfsvergunning` and `schuld` are the lexicon. |
+| The 15 notes and 3 households | These are the fixtures the whole argument rests on. |
+| The 14 v2 instrument items (§12) | The population answered *these*; a translation would be a different measurement. |
+
+On an English screen those three pages carry a visible line saying so, and each is marked
+`lang="nl"` so a screen reader switches voice instead of reading Dutch with English phonetics.
+The v1 questionnaire *is* translated, because it is a strawman we wrote to argue against.
+
+The guarantee is enforced, not asserted: the dictionary's English half is typed as
+`Record<DictKey, string>`, so a missing key fails `tsc`; `src/test/i18n.test.ts` checks that no
+English value is empty, that every `{placeholder}` matches across languages, and that no English
+string is a copy of the Dutch one (with a curated list of the words that are genuinely the same —
+*Instrument*, *Audit*, *Review*, *Export*).
 
 No network is required at runtime, and there is no Google Fonts CDN call — the three families are
 self-hosted woff2 in `public/fonts/`.

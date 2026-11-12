@@ -8,6 +8,8 @@ import { DIMENSIONS, DIMS, type ArchetypeKey, type Dim } from "@/domain/swarm/ar
 import { ARCH_COLORS } from "@/domain/swarm/archetypes";
 import { answerInstrument } from "@/domain/swarm/instrument";
 import { mulberry32 } from "@/domain/swarm/rng";
+import type { Locale } from "@/i18n/dict";
+import { fill, swarmCopy, type SwarmCopy } from "@/i18n/swarm";
 
 export interface LabProps {
   report: {
@@ -71,6 +73,7 @@ export interface LabProps {
     honesty: string[];
   };
   personas: Persona[];
+  locale: Locale;
 }
 
 const DIM_COLORS: Record<string, string> = {
@@ -84,7 +87,8 @@ const DIM_COLORS: Record<string, string> = {
 
 type Tab = "lab" | "report" | "priors" | "instrument";
 
-export function SwarmLab({ report, personas }: LabProps) {
+export function SwarmLab({ report, personas, locale }: LabProps) {
+  const c = swarmCopy(locale);
   const [tab, setTab] = useState<Tab>("lab");
   const [round, setRound] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -220,29 +224,34 @@ export function SwarmLab({ report, personas }: LabProps) {
       <div className="row between wrap" style={{ alignItems: "flex-end" }}>
         <div>
           <div className="mono small muted" style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Swarm Lab · {report.n_agents} synthetische agenten · {report.runs} runs
+            {fill(c.eyebrowMeta, { agents: report.n_agents, runs: report.runs })}
           </div>
-          <h1 style={{ marginTop: 4 }}>Wat de populatie van onze aannames vindt</h1>
+          <h1 style={{ marginTop: 4 }}>{c.eyebrow}</h1>
           <p className="muted" style={{ marginTop: 6, maxWidth: "74ch" }}>
-            Geen taalmodel wordt aangeroepen. Dit is een dynamisch systeem over een synthetische populatie — de
-            uitkomst is een frequentie, geen voorspelling.
+            {c.lede}
           </p>
         </div>
         <div className="honesty">
-          <i>GEEN LLM</i>
+          <i>{c.chips.noLlm}</i>
           <i>SYNTHETISCH</i>
-          <i>GEEN VOORSPELLING</i>
-          <i>PRIOREN ZIJN AANNAMES</i>
+          <i>{c.chips.noPrediction}</i>
+          <i>{c.chips.priorsAreAssumptions}</i>
         </div>
       </div>
+
+      {locale === "en" && (
+        <p className="small muted" data-testid="fixture-note" style={{ marginTop: 2 }}>
+          {c.note}
+        </p>
+      )}
 
       <div className="tabs" role="tablist">
         {(
           [
-            ["lab", "Lab"],
-            ["report", "Report"],
-            ["priors", "Aannames"],
-            ["instrument", "Instrument"],
+            ["lab", c.tabs.lab],
+            ["report", c.tabs.report],
+            ["priors", c.tabs.priors],
+            ["instrument", c.tabs.instrument],
           ] as [Tab, string][]
         ).map(([id, label]) => (
           <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>
@@ -269,20 +278,21 @@ export function SwarmLab({ report, personas }: LabProps) {
                 onPick={pickAgent}
                 onFps={setFps}
                 highlightId={persona?.id ?? null}
+                decisionLabel={c.canvas.decisionLine}
               />
               <div className="canvas-overlay">
                 <span>
-                  ronde <b>{snap.round}</b>/{maxRound}
+                  {c.overlay.round} <b>{snap.round}</b>/{maxRound}
                 </span>
                 <span>
-                  {dim} gem. <b>{snap.means[dim].toFixed(3)}</b>
+                  {dim} {c.overlay.mean} <b>{snap.means[dim].toFixed(3)}</b>
                 </span>
                 <span>
-                  rechts van {decisionLine.toFixed(2)}: <b>{rightCount}</b>/{report.n_agents}
+                  {c.overlay.right} {decisionLine.toFixed(2)}: <b>{rightCount}</b>/{report.n_agents}
                 </span>
                 {fps && <span>fps <b>{fps.toFixed(0)}</b></span>}
                 <span style={{ marginLeft: "auto" }}>
-                  {snap.event ? <b>⚡ {snap.event}</b> : "geen gebeurtenis deze ronde"}
+                  {snap.event ? <b>⚡ {snap.event}</b> : c.overlay.noEvent}
                 </span>
               </div>
             </div>
@@ -291,19 +301,19 @@ export function SwarmLab({ report, personas }: LabProps) {
               <div className="row wrap between" style={{ gap: 10 }}>
                 <div className="row" style={{ gap: 6 }}>
                   <button type="button" className="btn sm primary" onClick={() => setPlaying((p) => !p)}>
-                    {playing ? "Pause" : "Start"}
+                    {playing ? c.controls.pause : c.controls.start}
                   </button>
                   <button
                     type="button"
                     className="btn sm"
                     onClick={() => setRound((r) => Math.min(maxRound, r + 1))}
                   >
-                    Step
+                    {c.controls.step}
                   </button>
                   <button type="button" className="btn sm" onClick={reset}>
-                    Reset
+                    {c.controls.reset}
                   </button>
-                  <div className="seg" aria-label="Snelheid">
+                  <div className="seg" aria-label={c.controls.speed}>
                     {[1, 2, 4].map((s) => (
                       <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)}>
                         {s}×
@@ -322,20 +332,29 @@ export function SwarmLab({ report, personas }: LabProps) {
                       setPlaying(false);
                       setRound(Number(e.target.value));
                     }}
-                    aria-label="Ronde scrubben"
+                    aria-label={c.controls.scrub}
                   />
                   <span className="mono small muted">{maxRound}</span>
                 </div>
               </div>
 
-              <Sparkline result={result} dim={dim} round={round} onScrub={(r) => { setPlaying(false); setRound(r); }} />
+              <Sparkline
+                result={result}
+                dim={dim}
+                round={round}
+                onScrub={(r) => {
+                  setPlaying(false);
+                  setRound(r);
+                }}
+                label={c.spark.aria}
+              />
             </div>
 
             <div className="card card-pad stack">
               <div className="row between wrap">
-                <h3>Brand je eigen verhaal</h3>
+                <h3>{c.inject.title}</h3>
                 <span className="small muted">
-                  De hele simulatie wordt opnieuw gedraaid met deze gebeurtenis geïnjecteerd — dus deterministisch.
+                  {c.inject.lede}
                 </span>
               </div>
               <div className="chips-scroll">
@@ -347,14 +366,14 @@ export function SwarmLab({ report, personas }: LabProps) {
                     onClick={() => fireEvent(e.id)}
                     title={`${e.detail_nl} — ${Object.entries(e.effect).map(([d, v]) => `${d} ${v > 0 ? "+" : ""}${v}`).join(", ")}`}
                   >
-                    {e.label_nl}
+                    {c.events[e.id] ?? e.label_nl}
                   </button>
                 ))}
               </div>
               {injected && (
                 <p className="small" style={{ color: "var(--measure)" }}>
-                  Geïnjecteerd: <strong>{EVENTS.find((e) => e.id === injected.id)?.label_nl}</strong> in ronde{" "}
-                  {injected.round}. De gestippelde ringen op het canvas zijn de eindstand van de vorige run.
+                  {c.inject.injected} <strong>{c.events[injected.id] ?? EVENTS.find((e) => e.id === injected.id)?.label_nl}</strong>{" "}
+                  {fill(c.inject.tail, { round: injected.round })}
                 </p>
               )}
             </div>
@@ -362,7 +381,7 @@ export function SwarmLab({ report, personas }: LabProps) {
 
           <div className="stack">
             <div className="card card-pad">
-              <h3 style={{ marginBottom: 8 }}>Dimensie</h3>
+              <h3 style={{ marginBottom: 8 }}>{c.dim.title}</h3>
               <div className="stack tight">
                 {DIMENSIONS.map((d) => (
                   <button
@@ -371,27 +390,27 @@ export function SwarmLab({ report, personas }: LabProps) {
                     onClick={() => setDim(d.id)}
                     className={`chip ${dim === d.id ? "active" : ""}`}
                     style={{ textAlign: "left", width: "100%", borderRadius: 6 }}
-                    title={d.blurb_nl}
+                    title={c.dims[d.id].blurb}
                   >
-                    {d.label_nl}
+                    {c.dims[d.id].label}
                   </button>
                 ))}
               </div>
               <p className="small muted" style={{ marginTop: 10 }}>
-                {DIMENSIONS.find((d) => d.id === dim)?.blurb_nl}
+                {c.dims[dim].blurb}
               </p>
               <div className="row between small mono" style={{ marginTop: 6, color: "var(--muted)" }}>
-                <span>← {DIMENSIONS.find((d) => d.id === dim)?.left_nl}</span>
+                <span>← {c.dims[dim].left}</span>
               </div>
               <div className="row between small mono" style={{ marginTop: 2, color: "var(--muted)", justifyContent: "flex-end" }}>
-                <span>{DIMENSIONS.find((d) => d.id === dim)?.right_nl} →</span>
+                <span>{c.dims[dim].right} →</span>
               </div>
             </div>
 
             <div className="card card-pad">
-              <h3 style={{ marginBottom: 4 }}>De beslissingslijn</h3>
+              <h3 style={{ marginBottom: 4 }}>{c.line.title}</h3>
               <p className="small muted" style={{ marginBottom: 8 }}>
-                Waar je &ldquo;voor&rdquo; legt, bepaalt de uitslag. Sleep hem.
+                {c.line.lede}
               </p>
               <input
                 type="range"
@@ -400,21 +419,21 @@ export function SwarmLab({ report, personas }: LabProps) {
                 step={0.01}
                 value={decisionLine}
                 onChange={(e) => setDecisionLine(Number(e.target.value))}
-                aria-label="Beslissingslijn op de dimensie-as"
+                aria-label={c.line.aria}
               />
               <div className="row between mono small" style={{ marginTop: 4 }}>
                 <span>{decisionLine.toFixed(2)}</span>
                 <span>
-                  {rightCount} van {report.n_agents} agenten rechts
+                  {fill(c.line.right, { n: rightCount, total: report.n_agents })}
                 </span>
               </div>
             </div>
 
             <div className="card card-pad">
-              <h3 style={{ marginBottom: 8 }}>Twee knoppen, beide eerlijk</h3>
+              <h3 style={{ marginBottom: 8 }}>{c.levers.title}</h3>
               <div className="lever">
                 <div className="lab">
-                  <span>druk</span>
+                  <span>{c.levers.pressure}</span>
                   <span>{pressure.toFixed(1)}</span>
                 </div>
                 <input
@@ -424,12 +443,12 @@ export function SwarmLab({ report, personas }: LabProps) {
                   step={0.1}
                   value={pressure}
                   onChange={(e) => setPressure(Number(e.target.value))}
-                  aria-label="Druk"
+                  aria-label={c.levers.pressureAria}
                 />
               </div>
               <div className="lever">
                 <div className="lab">
-                  <span>vermenging</span>
+                  <span>{c.levers.mixing}</span>
                   <span>{mixing.toFixed(2)}</span>
                 </div>
                 <input
@@ -439,17 +458,16 @@ export function SwarmLab({ report, personas }: LabProps) {
                   step={0.02}
                   value={mixing}
                   onChange={(e) => setMixing(Number(e.target.value))}
-                  aria-label="Vermenging"
+                  aria-label={c.levers.mixingAria}
                 />
               </div>
               <p className="small muted">
-                Zet vermenging op 0 en de populatie valt uiteen in negen niet-communicerende blokken. Dat is wat
-                homofilie met een landelijk programma doet.
+                {c.levers.lede}
               </p>
             </div>
 
             <div className="card card-pad">
-              <h3 style={{ marginBottom: 6 }}>Zes dimensies nu</h3>
+              <h3 style={{ marginBottom: 6 }}>{c.now.title}</h3>
               {DIMS.map((d) => (
                 <div key={d} style={{ marginBottom: 8 }}>
                   <div className="row between small mono">
@@ -471,9 +489,9 @@ export function SwarmLab({ report, personas }: LabProps) {
         </div>
       )}
 
-      {tab === "report" && <ReportTab report={report} />}
-      {tab === "priors" && <PriorsTab report={report} />}
-      {tab === "instrument" && <InstrumentTab report={report} />}
+      {tab === "report" && <ReportTab report={report} c={c} />}
+      {tab === "priors" && <PriorsTab report={report} c={c} />}
+      {tab === "instrument" && <InstrumentTab report={report} c={c} />}
 
       {persona && picked !== null && (
         <div className="profile-card">
@@ -487,7 +505,7 @@ export function SwarmLab({ report, personas }: LabProps) {
                 {persona.archetype_nl} · {persona.hood} · label {persona.label}
               </div>
             </div>
-            <button type="button" className="btn ghost sm" onClick={() => setPicked(null)} aria-label="Sluiten">
+            <button type="button" className="btn ghost sm" onClick={() => setPicked(null)} aria-label={c.profile.close}>
               ✕
             </button>
           </div>
@@ -497,7 +515,7 @@ export function SwarmLab({ report, personas }: LabProps) {
 
           <div style={{ marginTop: 10 }}>
             <div className="small muted" style={{ marginBottom: 4 }}>
-              prior per dimensie
+              {c.profile.prior}
             </div>
             {DIMS.map((d) => (
               <div key={d} className="row" style={{ gap: 6, marginBottom: 3 }}>
@@ -515,7 +533,7 @@ export function SwarmLab({ report, personas }: LabProps) {
           </div>
 
           <div style={{ marginTop: 10 }}>
-            <div className="small muted">wat ze zeiden (instrument)</div>
+            <div className="small muted">{c.profile.said}</div>
             {answers.slice(0, 5).map((a) => (
               <div key={a.item} className="row between" style={{ fontSize: 11.5, marginTop: 2 }}>
                 <span className="mono muted">q{a.no}</span>
@@ -527,7 +545,7 @@ export function SwarmLab({ report, personas }: LabProps) {
           </div>
 
           <div style={{ marginTop: 10 }}>
-            <div className="small muted">hoeveel ze bewogen</div>
+            <div className="small muted">{c.profile.moved}</div>
             <div className="row between mono" style={{ fontSize: 11.5 }}>
               <span>Δ {result.changed[picked].toFixed(3)}</span>
               <span>
@@ -540,21 +558,21 @@ export function SwarmLab({ report, personas }: LabProps) {
               style={{ marginTop: 6, width: "100%" }}
               onClick={() => setShowExplainer(showExplainer ? null : "why")}
             >
-              Waarom veranderde deze?
+              {c.profile.why}
             </button>
             {showExplainer === "why" && (
               <div className="small" style={{ marginTop: 6, lineHeight: 1.5 }}>
                 <div className="muted" style={{ marginBottom: 4 }}>
-                  Gebeurtenissen in deze run:
+                  {c.profile.events}
                 </div>
                 {result.events.map((e) => (
                   <div key={e.id} className="row between">
-                    <span className="mono">ronde {e.round}</span>
-                    <span style={{ textAlign: "right", marginLeft: 6 }}>{e.label_nl}</span>
+                    <span className="mono">{fill(c.profile.round, { round: e.round })}</span>
+                    <span style={{ textAlign: "right", marginLeft: 6 }}>{c.events[e.id] ?? e.label_nl}</span>
                   </div>
                 ))}
                 <div className="muted" style={{ marginTop: 6 }}>
-                  Buren in de laatste ronde ({Math.min(3, (result.neighbours[picked] ?? []).length)} getoond):
+                  {fill(c.profile.neighbours, { n: Math.min(3, (result.neighbours[picked] ?? []).length) })}
                 </div>
                 {(result.neighbours[picked] ?? []).slice(0, 3).map((j) => (
                   <div key={j} className="row between">
@@ -567,7 +585,7 @@ export function SwarmLab({ report, personas }: LabProps) {
                   </div>
                 ))}
                 <div className="muted" style={{ marginTop: 6 }}>
-                  Geen model, geen verklaring: dit zijn de buren en de schokken die in deze run zijn gevuurd.
+                  {c.profile.footer}
                 </div>
               </div>
             )}
@@ -577,7 +595,7 @@ export function SwarmLab({ report, personas }: LabProps) {
 
       {trace.length > 0 && tab === "lab" && (
         <div className="card card-pad">
-          <h3 style={{ marginBottom: 6 }}>Geschiedenis van deze sessie</h3>
+          <h3 style={{ marginBottom: 6 }}>{c.history.title}</h3>
           {trace.map((t, i) => (
             <div key={i} className="row between small" style={{ padding: "3px 0", borderBottom: "1px solid var(--line)" }}>
               <span>
@@ -597,11 +615,13 @@ function Sparkline({
   dim,
   round,
   onScrub,
+  label,
 }: {
   result: RunResult;
   dim: Dim;
   round: number;
   onScrub: (r: number) => void;
+  label: string;
 }) {
   const W = 720;
   const H = 90;
@@ -621,7 +641,7 @@ function Sparkline({
         viewBox={`0 0 ${W} ${H}`}
         preserveAspectRatio="none"
         role="img"
-        aria-label={`Gemiddelde van ${dim} over ${n} rondes`}
+        aria-label={fill(label, { dim, n })}
         onClick={(e) => {
           const box = (e.target as SVGElement).closest("svg")!.getBoundingClientRect();
           const t = (e.clientX - box.left) / box.width;
@@ -654,14 +674,14 @@ function Sparkline({
   );
 }
 
-function ReportTab({ report }: { report: LabProps["report"] }) {
+function ReportTab({ report, c }: { report: LabProps["report"]; c: SwarmCopy }) {
   const broken = report.falsifiers.filter((f) => f.would_break_pitch);
   return (
     <div className="stack" style={{ gap: 16 }}>
       <div className="card card-pad">
-        <h2>De zes frequenties</h2>
+        <h2>{c.report.frequenciesTitle}</h2>
         <p className="small muted" style={{ marginTop: 4 }}>
-          Elke frequentie met n en een 95%-Wilson-interval. Nooit een kaal percentage.
+          {c.report.frequenciesLede}
         </p>
         <div style={{ marginTop: 10 }}>
           {report.frequencies.map((f) => (
@@ -676,18 +696,18 @@ function ReportTab({ report }: { report: LabProps["report"] }) {
 
       <div className="card card-pad">
         <div className="row between">
-          <h2>Falsifiers — geschreven vóór de run</h2>
-          <span className={`pill ${broken.length ? "dropped" : "done"}`}>{broken.length} breekt de pitch</span>
+          <h2>{c.report.falsifiersTitle}</h2>
+          <span className={`pill ${broken.length ? "dropped" : "done"}`}>{fill(c.report.breakPitch, { n: broken.length })}</span>
         </div>
         <table className="tbl" style={{ marginTop: 10 }}>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Claim</th>
-              <th>Test</th>
-              <th>Uitkomst</th>
-              <th>Houdt stand?</th>
-              <th>Breekt de pitch?</th>
+              <th>{c.report.colId}</th>
+              <th>{c.report.colClaim}</th>
+              <th>{c.report.colTest}</th>
+              <th>{c.report.colOutcome}</th>
+              <th>{c.report.colHolds}</th>
+              <th>{c.report.colBreaks}</th>
             </tr>
           </thead>
           <tbody>
@@ -699,7 +719,7 @@ function ReportTab({ report }: { report: LabProps["report"] }) {
                 <td className="mono">
                   {f.hits}/{f.n} · p={f.frequency_p.toFixed(3)} · {f.ci_lo.toFixed(3)}–{f.ci_hi.toFixed(3)}
                 </td>
-                <td>{f.claim_holds ? <span className="pill done">ja</span> : <span className="pill dropped">nee</span>}</td>
+                <td>{f.claim_holds ? <span className="pill done">{c.report.yes}</span> : <span className="pill dropped">{c.report.no}</span>}</td>
                 <td>
                   <span className="pill mono" style={f.would_break_pitch ? { color: "var(--warm)", borderColor: "var(--warm)" } : undefined}>
                     {String(f.would_break_pitch)}
@@ -721,17 +741,17 @@ function ReportTab({ report }: { report: LabProps["report"] }) {
 
       <div className="grid g2">
         <div className="card card-pad">
-          <h2>Per dimensie</h2>
+          <h2>{c.report.perDim}</h2>
           <table className="tbl" style={{ marginTop: 8 }}>
             <thead>
               <tr>
-                <th>Dimensie</th>
-                <th className="num">gem.</th>
+                <th>{c.report.dim}</th>
+                <th className="num">{c.report.mean}</th>
                 <th className="num">sd</th>
                 <th className="num">p10</th>
                 <th className="num">p50</th>
                 <th className="num">p90</th>
-                <th className="num">steun</th>
+                <th className="num">{c.report.support}</th>
               </tr>
             </thead>
             <tbody>
@@ -750,13 +770,13 @@ function ReportTab({ report }: { report: LabProps["report"] }) {
           </table>
         </div>
         <div className="card card-pad">
-          <h2>Histogram — steun per run</h2>
+          <h2>{c.report.histogram}</h2>
           <div style={{ marginTop: 10 }}>
             {report.dim_stats.map((d) => (
               <div key={d.dim} style={{ marginBottom: 10 }}>
                 <div className="row between small mono">
                   <span>{d.dim}</span>
-                  <span className="muted">gem. steun {(d.support_mean * 100).toFixed(0)}%</span>
+                  <span className="muted">{fill(c.report.meanSupport, { pct: (d.support_mean * 100).toFixed(0) })}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "flex-end", gap: 1, height: 26 }}>
                   {d.support_hist.map((b) => {
@@ -764,7 +784,7 @@ function ReportTab({ report }: { report: LabProps["report"] }) {
                     return (
                       <div
                         key={b.from}
-                        title={`${b.from.toFixed(2)}–${b.to.toFixed(2)}: ${b.n} runs`}
+                        title={`${b.from.toFixed(2)}–${b.to.toFixed(2)}: ${b.n} ${c.report.runsUnit}`}
                         style={{
                           flex: 1,
                           height: `${Math.max(1, (b.n / max) * 26)}px`,
@@ -783,13 +803,10 @@ function ReportTab({ report }: { report: LabProps["report"] }) {
 
       <div className="grid g2">
         <div className="card card-pad">
-          <h2>Wat het niet zegt</h2>
+          <h2>{c.report.notSays}</h2>
           <p style={{ fontSize: 13.5, lineHeight: 1.65, marginTop: 8 }}>
-            Dit is geen voorspelling en geen onderzoek. De populatie is een tabel met aannames, en elke agent is
-            een tekenreeks met een prior. De frequenties hierboven zeggen: <em>als</em> deze negen aannames waar
-            zijn, dan valt in {report.runs} runs een meerderheid zo uit. Verander een prior en de uitkomst
-            verschuift — dat is het punt, niet de uitkomst. Er is geen echt huishouden, geen echte coach en geen
-            echt programma in deze cijfers, en er is geen taalmodel aan te pas gekomen.
+            {c.report.notSays1} <em>{c.report.notSaysAls}</em>{" "}
+            {fill(c.report.notSays2, { runs: report.runs })}
           </p>
           <div className="row wrap" style={{ gap: 6, marginTop: 10 }}>
             {report.honesty.map((h) => (
@@ -800,27 +817,31 @@ function ReportTab({ report }: { report: LabProps["report"] }) {
           </div>
         </div>
         <div className="card card-pad">
-          <h2>Drie bevindingen</h2>
+          <h2>{c.report.findings}</h2>
           <ol style={{ fontSize: 13.5, lineHeight: 1.6, marginTop: 8, paddingLeft: 18 }}>
             <li style={{ marginBottom: 8 }}>
-              <strong>Vertrouwen is de zwakke schakel.</strong> {report.frequencies.find((f) => f.id === "QTRUST")?.line}.{" "}
-              De eerste koper is daarom een welzijnsorganisatie, niet een gemeente.
+              <strong>{c.report.f1}</strong> {report.frequencies.find((f) => f.id === "QTRUST")?.line}.{" "}
+              {c.report.f1tail}
             </li>
             <li style={{ marginBottom: 8 }}>
-              <strong>Het permissiemodel is fragiel.</strong> In{" "}
-              {report.frequencies.find((f) => f.id === "QSCANDAL")?.hits} van{" "}
-              {report.frequencies.find((f) => f.id === "QSCANDAL")?.n} runs met het lek verliest voice zijn
-              meerderheid. Dat maakt het permissiemodel het product en niet een functie.
+              <strong>{c.report.f2}</strong>{" "}
+              {fill(c.report.f2body, {
+                hits: report.frequencies.find((f) => f.id === "QSCANDAL")?.hits ?? 0,
+                n: report.frequencies.find((f) => f.id === "QSCANDAL")?.n ?? 0,
+              })}
             </li>
             <li>
-              <strong>Vastleggen per spraak is geen probleem.</strong>{" "}
-              {report.frequencies.find((f) => f.id === "QADOPT")?.line}. Dat is de aanname die we niet hoeven te
-              verdedigen.
+              <strong>{c.report.f3}</strong>{" "}
+              {report.frequencies.find((f) => f.id === "QADOPT")?.line}. {c.report.f3tail}
             </li>
           </ol>
           <p className="small muted" style={{ marginTop: 10 }}>
-            Run: {report.runs} × {report.rounds} rondes, seed {report.seed_base}, {report.elapsed_ms} ms, geen
-            netwerk.
+            {fill(c.report.runLine, {
+              runs: report.runs,
+              rounds: report.rounds,
+              seed: report.seed_base,
+              ms: report.elapsed_ms,
+            })}
           </p>
         </div>
       </div>
@@ -828,31 +849,31 @@ function ReportTab({ report }: { report: LabProps["report"] }) {
   );
 }
 
-function PriorsTab({ report }: { report: LabProps["report"] }) {
+function PriorsTab({ report, c }: { report: LabProps["report"]; c: SwarmCopy }) {
   return (
     <div className="stack" style={{ gap: 16 }}>
       <div className="card card-pad">
         <div className="row between wrap">
-          <h2>De aannames, op het scherm</h2>
-          <span className="pill synth">PRIOREN ZIJN AANNAMES</span>
+          <h2>{c.priors.title}</h2>
+          <span className="pill synth">{c.priors.pill}</span>
         </div>
         <p className="small muted" style={{ marginTop: 4 }}>
-          Lees deze tabel als claims, niet als data. Verander een prior en het rapport verschuift.
+          {c.priors.lede}
         </p>
         <div style={{ overflowX: "auto", marginTop: 10 }}>
           <table className="tbl">
             <thead>
               <tr>
-                <th>Archetype</th>
+                <th>{c.priors.archetype}</th>
                 <th className="num">n</th>
                 {DIMS.map((d) => (
                   <th key={d} className="num">
                     {d}
                   </th>
                 ))}
-                <th className="num">stem</th>
-                <th className="num">vatbaar</th>
-                <th className="num">overtuiging</th>
+                <th className="num">{c.priors.voice}</th>
+                <th className="num">{c.priors.susceptibility}</th>
+                <th className="num">{c.priors.conviction}</th>
               </tr>
             </thead>
             <tbody>
@@ -878,24 +899,24 @@ function PriorsTab({ report }: { report: LabProps["report"] }) {
           </table>
         </div>
         <p className="small muted" style={{ marginTop: 8 }}>
-          N = {report.n_agents}. Quota exact: floor per archetype, rest naar de laatste. Elke agent is{" "}
-          <span className="mono">synthetic: true</span>.
+          {fill(c.priors.quota1, { n: report.n_agents })} <span className="mono">synthetic: true</span>
+          {c.priors.quota2}
         </p>
       </div>
 
       <div className="card card-pad">
-        <h2>Na de run, per archetype</h2>
+        <h2>{c.priors.after}</h2>
         <table className="tbl" style={{ marginTop: 8 }}>
           <thead>
             <tr>
-              <th>Archetype</th>
+              <th>{c.priors.archetype}</th>
               <th className="num">n</th>
               {DIMS.map((d) => (
                 <th key={d} className="num">
                   {d}
                 </th>
               ))}
-              <th className="num">onthoudt zich</th>
+              <th className="num">{c.priors.abstains}</th>
             </tr>
           </thead>
           <tbody>
@@ -916,41 +937,29 @@ function PriorsTab({ report }: { report: LabProps["report"] }) {
           </tbody>
         </table>
         <p className="small muted" style={{ marginTop: 8 }}>
-          Onthouding is een bevinding, geen datagat: wantrouwen verhoogt de kans dat iemand een persoonlijke vraag
-          weigert, en dat tellen we.
+          {c.priors.abstainNote}
         </p>
       </div>
     </div>
   );
 }
 
-function InstrumentTab({ report }: { report: LabProps["report"] }) {
+function InstrumentTab({ report, c }: { report: LabProps["report"]; c: SwarmCopy }) {
   return (
     <div className="stack" style={{ gap: 16 }}>
       <div className="card card-pad">
-        <h2>Dekkingsmatrix — v1 dekt 2,5 van 10</h2>
+        <h2>{c.instrument.title}</h2>
         <table className="tbl" style={{ marginTop: 10 }}>
           <thead>
             <tr>
-              <th>Noodzaak</th>
-              <th>Waarom het telt</th>
+              <th>{c.instrument.necessity}</th>
+              <th>{c.instrument.why}</th>
               <th>v1</th>
               <th>v2</th>
             </tr>
           </thead>
           <tbody>
-            {[
-              ["N1 · Accepteert het huishouden een zichtbaar dossier?", "het permissiemodel is het product", "✗ nooit gevraagd", "✓ voice, q_visible"],
-              ["N2 · Is follow-through geaccepteerd als maatstaf?", "het meetargument", "✗", "✓ metric"],
-              ["N3 · Wie betaalt volgens de populatie?", "bepaalt de verkooproute", "deels", "✓ payer"],
-              ["N4 · Neemt een coach op met spraak?", "adoptie sterft hier", "✗", "✓ adopt, q_capture"],
-              ["N5 · Vertrouwt het huishouden de gemeente?", "voorwaarde voor route 1", "✗", "✓ trust"],
-              ["N6 · Is sorteren eerlijk?", "de enige eerlijkheidsvraag die het product maakt", "✗", "✓ queue"],
-              ["N7 · Hoe groot is het geheugenprobleem, gemeten?", "de pitch zegt: de helft sterft", "✗", "✓ q_followthrough"],
-              ["N8 · Welke barrière komt eerst?", "bepaalt de brief-template", "deels", "✓ q_barrier"],
-              ["N9 · Accepteren ze een huisbezoek?", "het levermodel", "✗", "✓ q_visit"],
-              ["N10 · Wat zou ze laten stoppen?", "churn, voordat het gebeurt", "✗", "✓ q_stop"],
-            ].map((r, i) => (
+            {c.instrument.rows.map((r, i) => (
               <tr key={i}>
                 <td>{r[0]}</td>
                 <td className="small muted">{r[1]}</td>
@@ -963,29 +972,27 @@ function InstrumentTab({ report }: { report: LabProps["report"] }) {
           </tbody>
         </table>
         <p className="small muted" style={{ marginTop: 8 }}>
-          v1 bestaat uit tien vragen in de vorm die teams standaard schrijven — &ldquo;wat is uw grootste
-          moeilijkheid&rdquo;, &ldquo;hoe waarschijnlijk zou u dit gebruiken (1–5)&rdquo;. Die tien kunnen N1,
-          N2 en N5 niet leren: ze noemen het onderwerp niet.
+          {c.instrument.lede}
         </p>
       </div>
 
       <div className="grid g2">
         <div className="card card-pad">
-          <h2>Export</h2>
+          <h2>{c.instrument.exportTitle}</h2>
           <p className="small muted" style={{ marginTop: 4 }}>
-            240 synthetische respondenten, alle 14 items, inclusief onthoudingen.
+            {c.instrument.exportLede}
           </p>
           <div className="row wrap" style={{ gap: 6, marginTop: 10 }}>
             <a className="btn sm" href="/api/survey?version=v2" download>
-              v2 CSV — 14 items
+              {c.instrument.v2}
             </a>
             <a className="btn sm ghost" href="/api/survey?version=v1" download>
-              v1 CSV — 10 items
+              {c.instrument.v1}
             </a>
           </div>
         </div>
         <div className="card card-pad">
-          <h2>Onthouding per archetype</h2>
+          <h2>{c.instrument.abstention}</h2>
           <table className="tbl" style={{ marginTop: 8 }}>
             <tbody>
               {report.abstention.map((a) => (

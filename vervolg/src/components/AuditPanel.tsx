@@ -3,8 +3,18 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AuditRow, ChainVerification } from "@/domain/types";
+import { t as tr, type DictKey, type Locale } from "@/i18n/dict";
 
-export function AuditPanel({ initial, rows }: { initial: ChainVerification; rows: AuditRow[] }) {
+export function AuditPanel({
+  initial,
+  rows,
+  locale,
+}: {
+  initial: ChainVerification;
+  rows: AuditRow[];
+  locale: Locale;
+}) {
+  const t = (k: DictKey, v?: Record<string, string | number>) => tr(locale, k, v);
   const [v, setV] = useState<ChainVerification & { bad?: number }>(initial);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -41,21 +51,21 @@ export function AuditPanel({ initial, rows }: { initial: ChainVerification; rows
   return (
     <div className="card">
       <div className="card-head">
-        <h2>Controleur</h2>
+        <h2>{t("ver.checker")}</h2>
         <span className={`pill ${v.brokenAt === null ? "done" : "dropped"}`}>
-          {v.brokenAt === null ? "keten intact" : `gebroken bij rij ${v.brokenAt}`}
+          {v.brokenAt === null ? t("ver.chain_ok") : t("ver.broken_at_row", { n: v.brokenAt })}
         </span>
       </div>
       <div className="card-pad stack">
         <div className="row wrap" style={{ gap: 8 }}>
           <button type="button" className="btn sm warm" onClick={() => op("tamper")} disabled={busy || pending}>
-            Wijzig rij 7 in het bestand
+            {t("ver.tamper")}
           </button>
           <button type="button" className="btn sm" onClick={() => op("reset")} disabled={busy || pending}>
-            Herstel uit backup
+            {t("ver.reset")}
           </button>
           <span className="small muted">
-            Dit zijn dezelfde bytes die <span className="mono">scripts/verify-chain.ts</span> leest.
+            {t("ver.same_bytes")}
           </span>
         </div>
 
@@ -70,7 +80,7 @@ export function AuditPanel({ initial, rows }: { initial: ChainVerification; rows
           <span>total={v.total}</span>
           <span>verified={v.verified}</span>
           <span>brokenAt={v.brokenAt === null ? "null" : v.brokenAt}</span>
-          {typeof v.bad === "number" && v.bad > 0 && <span style={{ color: "var(--warm)" }}>ongeldige regels={v.bad}</span>}
+          {typeof v.bad === "number" && v.bad > 0 && <span style={{ color: "var(--warm)" }}>{t("ver.invalid_rows", { n: v.bad })}</span>}
         </div>
 
         <div className="scroll-x" style={{ maxHeight: 420, overflowY: "auto", border: "1px solid var(--line)", borderRadius: 6 }}>
@@ -102,8 +112,7 @@ export function AuditPanel({ initial, rows }: { initial: ChainVerification; rows
           </table>
         </div>
         <p className="small muted">
-          Rij 7 is bewust een <span className="mono">brief.generated</span>-gebeurtenis: de minst alarmeerde regel in
-          het bestand, en daarom de leerzaamste om mee te knoeien.
+          {t("ver.colophon")}
         </p>
       </div>
     </div>

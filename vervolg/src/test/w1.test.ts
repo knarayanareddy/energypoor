@@ -13,6 +13,8 @@ import {
 import { briefCsv, buildBrief, buildFamilyView } from "../domain/brief";
 import { extract, extractCanonical } from "../domain/extract";
 import { cases, households, notes } from "./fixtures";
+import { DICTS } from "../i18n/dict";
+import { swarmCopy } from "../i18n/swarm";
 import type { Household } from "../domain/types";
 
 /**
@@ -30,8 +32,15 @@ describe("W1 / T-01 — no score about a household", () => {
   });
 
   it("the queue's sort disclaimer is present in the UI source", () => {
-    const src = require("node:fs").readFileSync("src/components/CaseTable.tsx", "utf8") as string;
-    expect(src).toContain("Sorteert op het dossier, niet op de persoon.");
+    // The sentence moved into the dictionary when English was added, so the
+    // guarantee is now two-part: the Dutch copy exists, and the queue renders
+    // that key rather than a literal. Both halves are asserted here — checking
+    // only the dictionary would let a screen drop the line silently.
+    expect(DICTS.nl["home.queue.sort.note"]).toBe("Sorteert op het dossier, niet op de persoon.");
+    const src = readFileSync("src/components/CaseTable.tsx", "utf8");
+    // the queue receives its labels already resolved (a function cannot cross
+    // the server→client boundary) and must render the one it was handed
+    expect(src).toContain("labels.sortNote");
   });
 });
 
@@ -159,14 +168,22 @@ describe("W10 / T-10 — restricted content never reaches brief, family view or 
 
 describe("W12 / T-12 — every simulated or restricted value says so", () => {
   it("every screen that shows synthetic data renders SYNTHETISCH or Demo", () => {
-    const layout = readFileSync("src/app/layout.tsx", "utf8").toLowerCase();
-    // the footer honesty line is in the layout, so every screen carries it
-    expect(layout).toContain("demo — synthetic households");
-    expect(layout).toContain("synthetisch");
-    const lab = readFileSync("src/components/SwarmLab.tsx", "utf8");
+    // Every honesty mark is bilingual now. The Dutch string is the contract, so
+    // it is asserted directly; the English mirror must not silently drop one,
+    // which is what the second loop holds.
+    const nl = DICTS.nl;
+    expect(nl["honesty.demo"].toLowerCase()).toContain("demo — synthetic households");
+    expect(nl["common.synthetic"].toLowerCase()).toContain("synthetisch");
+    const layout = readFileSync("src/app/layout.tsx", "utf8");
+    expect(layout).toContain('t("honesty.demo")');
+
+    const lab = swarmCopy("nl");
+    const labEn = swarmCopy("en");
     for (const s of ["GEEN LLM", "SYNTHETISCH", "GEEN VOORSPELLING", "PRIOREN ZIJN AANNAMES"]) {
-      expect(lab).toContain(s);
+      expect(Object.values(lab.chips)).toContain(s);
     }
+    for (const chip of Object.values(labEn.chips)) expect(chip).not.toBe("");
+
     const brief = readFileSync("src/app/household/[id]/brief/page.tsx", "utf8");
     expect(brief).toContain("Niet opgenomen in dit overzicht");
     expect(brief).toContain("Demo — synthetic households");
